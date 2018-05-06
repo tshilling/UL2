@@ -28,8 +28,8 @@ public class LooseBlockScript : MonoBehaviour {
                 UnityEngine.Debug.Log("#### Pop a block: ####");
                 Block = CO.GetBlock(BlockPos);
                 for(int i = 0; i < 8; i++) { 
-                    Corners.Add(CO.GetBlock(BlockPos + ChunkObject.FacePts[i]).Data.ControlPoint+ ChunkObject.FacePts[i]);
-                    CornersSource.Add(ChunkObject.FacePts[i]);
+                    Corners.Add(CO.GetBlock(BlockPos + BlockProperties.FacePts[i]).Data.ControlPoint+ BlockProperties.FacePts[i]);
+                    CornersSource.Add(BlockProperties.FacePts[i]);
                 }
                 UnityEngine.Debug.Log("######################");
 
@@ -45,7 +45,7 @@ public class LooseBlockScript : MonoBehaviour {
                     {
                         for (int i = 0; i < 4; i++)
                         {
-                            chunkVertices.Add(MesherClass.FacePts[MesherClass.BlockFaces[Dir, i]] + CO.GetBlock(BlockPos + MesherClass.FacePts[MesherClass.BlockFaces[Dir, i]]).Data.ControlPoint);
+                            chunkVertices.Add(BlockProperties.FacePts[BlockProperties.BlockFaces[Dir, i]] + CO.GetBlock(BlockPos + BlockProperties.FacePts[BlockProperties.BlockFaces[Dir, i]]).Data.ControlPoint);
                         }
                         Vector3 V1 = chunkVertices[chunkVertices.Count - 1] - chunkVertices[chunkVertices.Count - 2];
                         Vector3 V2 = chunkVertices[chunkVertices.Count - 3] - chunkVertices[chunkVertices.Count - 2];
@@ -64,9 +64,9 @@ public class LooseBlockScript : MonoBehaviour {
                         Vector2[] UV = Block.GetTex();
                         Vector2 uv = new Vector2(UV[DirUV].x / 16f, (15 - UV[DirUV].y) / 16f);
                         chunkUV.Add(uv);
-                        chunkUV.Add(new Vector2(uv.x + MesherClass.tUnit, uv.y));
-                        chunkUV.Add(new Vector2(uv.x + MesherClass.tUnit, uv.y + MesherClass.tUnit));
-                        chunkUV.Add(new Vector2(uv.x, uv.y + MesherClass.tUnit));
+                        chunkUV.Add(new Vector2(uv.x + BlockProperties.TUnit, uv.y));
+                        chunkUV.Add(new Vector2(uv.x + BlockProperties.TUnit, uv.y + BlockProperties.TUnit));
+                        chunkUV.Add(new Vector2(uv.x, uv.y + BlockProperties.TUnit));
                     }
                 }
                 //####################################

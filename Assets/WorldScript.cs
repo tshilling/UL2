@@ -21,6 +21,7 @@ public class WorldScript : MonoBehaviour
 
     private Dictionary<ChunkObject, bool> chunksBuilding;
     private List<GameObject> LooseBlocks = new List<GameObject>();
+
     public WorldScript()
     {
         WorldCreator.Init(1234);
@@ -83,6 +84,7 @@ public class WorldScript : MonoBehaviour
     public Slider loadingSlider;
     int LoadCount = 0;
 
+    Stopwatch WatchdogTimer = new Stopwatch();
 
     private IEnumerator LoadInitScene()
     {
@@ -94,12 +96,11 @@ public class WorldScript : MonoBehaviour
             GameObject GO = Instantiate(baseChunk, new Vector3(WPt.x, WPt.y, WPt.z), Quaternion.identity);
             ChunkObject CO = GO.GetComponent<ChunkObject>();
             CO.ChunkBuilt += OnChunkBuilt;
-           
+
             Chunks.Add(WPt, GO);
             CO.asyncBuildChunk();
-           
-            yield return null;
 
+            yield return null;
         }
 
         WatchdogTimer.Start();
@@ -110,15 +111,18 @@ public class WorldScript : MonoBehaviour
             {
                 break;
             }
+
             yield return null;
         }
+
         UnityEngine.Debug.Log("Done Loading");
         loadingSlider.gameObject.SetActive(false);
         Player.GetComponent<FirstPersonController>().UnFreeze();
-        
+
         yield return null;
     }
-    Stopwatch WatchdogTimer = new Stopwatch();
+
+
     private void OnChunkBuilt(ChunkObject chunk)
     {
         LoadCount++;
@@ -152,7 +156,7 @@ public class WorldScript : MonoBehaviour
                 GameObject tempChunk;
                 if (Chunks.TryGetValue(WPt, out tempChunk))
                 {
-                    if (tempChunk.GetComponent<ChunkObject>().reMeshRequired)
+                    if (tempChunk.GetComponent<ChunkObject>().ReMeshRequired)
                     {
                         tempChunk.GetComponent<ChunkObject>().asyncReMeshChunk();
                     }
@@ -263,7 +267,8 @@ public class WorldScript : MonoBehaviour
                     BlockClass B = GetBlock(CP);
                     if (B.Data.Type != BlockClass.BlockType.Air)
                     {
-                        B.Data.Blockiness = (byte)Mathf.Clamp((float)B.Data.Blockiness + (MW * 160f), byte.MinValue + 1,
+                        B.Data.Blockiness = (byte) Mathf.Clamp((float) B.Data.Blockiness + (MW * 160f),
+                            byte.MinValue + 1,
                             byte.MaxValue); //MW steps by 0.1
                         List<GameObject> results = SetBlock(CP, B);
                         foreach (GameObject GO in results)
@@ -303,7 +308,7 @@ public class WorldScript : MonoBehaviour
                     NewB.Data.Blockiness = LastB.Data.Blockiness;
                     NewB.Data.Density = LastB.Data.Density;
                     NewB.Data.ControlPoint = LastB.Data.ControlPoint;
-                    
+
                     if (tempBlock != null)
                     {
                         tempBlock.transform.Translate(RH.normal); //Pop up so it doesn't fall through the world
@@ -315,6 +320,7 @@ public class WorldScript : MonoBehaviour
                             //GO.GetComponent<ChunkObject>().asyncReFaceChunk();
                         }
                     }
+
                     LooseBlocks.Add(tempBlock);
                 }
             }
