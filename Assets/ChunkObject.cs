@@ -422,7 +422,6 @@ public class ChunkObject : MonoBehaviour
     void AddFace(byte Dir, Vector3Int Center)
     {
         BlockClass CB = GetBlock(Center);// Blocks[Center.x+1,Center.y+1,Center.z+1];
-        UnityEngine.Debug.Log("Add Face");
         for (int i = 0; i < 4; i++)
         {
             Vector3Int Blk = Center + FacePts[BlockFaces[Dir, i]];
@@ -454,7 +453,6 @@ public class ChunkObject : MonoBehaviour
     void AddFaceWater(byte Dir, Vector3Int Center)
     {
         BlockClass CB = GetBlock(Center);// Blocks[Center.x+1,Center.y+1,Center.z+1];
-        UnityEngine.Debug.Log("Add Face");
         for (int i = 0; i < 4; i++)
         {
             Vector3Int Blk = Center + FacePts[BlockFaces[Dir, i]];

@@ -102,21 +102,28 @@ public class WorldScript : MonoBehaviour
 
         }
 
-
+        WatchdogTimer.Start();
         while (LoadCount < RenderList.Count)
         {
+            UnityEngine.Debug.Log("Waiting");
+            if (WatchdogTimer.ElapsedMilliseconds > 3000)
+            {
+                break;
+            }
             yield return null;
         }
-        
+        UnityEngine.Debug.Log("Done Loading");
         loadingSlider.gameObject.SetActive(false);
         Player.GetComponent<FirstPersonController>().UnFreeze();
         
         yield return null;
     }
-
+    Stopwatch WatchdogTimer = new Stopwatch();
     private void OnChunkBuilt(ChunkObject chunk)
     {
         LoadCount++;
+        WatchdogTimer.Reset();
+        WatchdogTimer.Start();
     }
 
     void Update()
@@ -322,7 +329,7 @@ public class WorldScript : MonoBehaviour
         }
     }
 
-    private BlockClass GetBlock(Vector3 Pnt)
+    public BlockClass GetBlock(Vector3 Pnt)
     {
         Vector3Int ChunkPos = Vector3Int.FloorToInt(Pnt / 16f) * 16;
         Vector3Int BlockPos = Vector3Int.FloorToInt(Pnt) - ChunkPos;
@@ -367,15 +374,12 @@ public class WorldScript : MonoBehaviour
         Vector3Int ChunkPos = Vector3Int.FloorToInt(Pnt / 16f) * 16;
         Vector3Int BlockPos = Vector3Int.FloorToInt(Pnt) - ChunkPos;
         //Test that block is contained in Block
-        UnityEngine.Debug.Log("SetBlock");
         if (BlockPos.x >= 0 & BlockPos.y >= 0 & BlockPos.z >= 0 & BlockPos.x < ChunkSize & BlockPos.y < ChunkSize &
             BlockPos.z < ChunkSize)
         {
-            UnityEngine.Debug.Log("In SetBlock If: " + ChunkPos);
             GameObject tempChunk;
             if (Chunks.TryGetValue(ChunkPos, out tempChunk))
             {
-                UnityEngine.Debug.Log("In Chunk: " + ChunkPos);
                 tempChunk.GetComponent<ChunkObject>().Blocks[BlockPos.x + 1][BlockPos.y + 1][BlockPos.z + 1] = B;
                 Affected.Add(tempChunk);
                 Vector3Int ChunkOffset = new Vector3Int();

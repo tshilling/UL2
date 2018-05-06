@@ -9,6 +9,7 @@ public class LooseBlockScript : MonoBehaviour {
     List<int> chunkTriangles = new List<int>();
     List<Vector2> chunkUV = new List<Vector2>();
     List<Vector3> Corners = new List<Vector3>();
+    List<Vector3> CornersSource = new List<Vector3>();
     // Use this for initialization
     public void InitBlockFromWorld(WorldScript world, Vector3 Pnt)
     {
@@ -24,13 +25,14 @@ public class LooseBlockScript : MonoBehaviour {
             if (world.Chunks.TryGetValue(ChunkPos, out tempChunk))
             {
                 ChunkObject CO = tempChunk.GetComponent<ChunkObject>();
+                UnityEngine.Debug.Log("#### Pop a block: ####");
                 Block = CO.GetBlock(BlockPos);
-                for(int i = 0; i < 8; i++)
-                {
-                    Corners.Add(CO.GetBlock(BlockPos + ChunkObject.FacePts[i]).Data.ControlPoint);
-
+                for(int i = 0; i < 8; i++) { 
+                    Corners.Add(CO.GetBlock(BlockPos + ChunkObject.FacePts[i]).Data.ControlPoint+ ChunkObject.FacePts[i]);
+                    CornersSource.Add(ChunkObject.FacePts[i]);
                 }
-                
+                UnityEngine.Debug.Log("######################");
+
                 chunkVertices.Clear();
                 chunkTriangles.Clear();
                 chunkUV.Clear();
@@ -82,28 +84,192 @@ public class LooseBlockScript : MonoBehaviour {
             }
         }
     }
+    public Vector3[,,] OrderPoints()
+    {
+        UnityEngine.Debug.Log("Point Count: " + Corners.Count);
+        List<Vector3> Input = new List<Vector3>(); 
+        for(int i = 0; i < Corners.Count; i++)
+        {
+            Input.Add(Corners[i]);
+        }
+
+        Vector3[,,] Result = new Vector3[2, 2, 2];
+        List<Vector3> MinX = SortMinMax(Input, sortDimension.x, minMax.min);
+        List<Vector3> MaxX = MinX.GetRange(4, 4);
+        MinX.RemoveRange(4, 4);
+        List<Vector3> MinXMinY = SortMinMax(MinX, sortDimension.y, minMax.min);
+        List<Vector3> MinXMaxY = MinXMinY.GetRange(2,2);
+        MinXMinY.RemoveRange(2,2);
+        List<Vector3> MaxXMinY = SortMinMax(MaxX, sortDimension.y, minMax.min);
+        List<Vector3> MaxXMaxY = MaxXMinY.GetRange(2, 2);
+        MaxXMinY.RemoveRange(2, 2);
+        if (MinXMinY[0].z < MinXMinY[1].z)
+        {
+            Result[0, 0, 0] = MinXMinY[0];
+            Result[0, 0, 1] = MinXMinY[1];
+        }
+        else
+        {
+            Result[0, 0, 0] = MinXMinY[1];
+            Result[0, 0, 1] = MinXMinY[0];
+        }
+        if (MinXMaxY[0].z < MinXMaxY[1].z)
+        {
+            Result[0, 1, 0] = MinXMaxY[0];
+            Result[0, 1, 1] = MinXMaxY[1];
+        }
+        else
+        {
+            Result[0, 1, 0] = MinXMaxY[1];
+            Result[0, 1, 1] = MinXMaxY[0];
+        }
+        if (MaxXMinY[0].z < MaxXMinY[1].z)
+        {
+            Result[1, 0, 0] = MaxXMinY[0];
+            Result[1, 0, 1] = MaxXMinY[1];
+        }
+        else
+        {
+            Result[1, 0, 0] = MaxXMinY[1];
+            Result[1, 0, 1] = MaxXMinY[0];
+        }
+        if (MaxXMaxY[0].z < MaxXMaxY[1].z)
+        {
+            Result[1, 1, 0] = MaxXMaxY[0];
+            Result[1, 1, 1] = MaxXMaxY[1];
+        }
+        else
+        {
+            Result[1, 1, 0] = MaxXMaxY[1];
+            Result[1, 1, 1] = MaxXMaxY[0];
+        }
+        return Result;
+    }
+    public enum sortDimension {x=0,y=1,z=2 };
+    public enum minMax { min=0,max=1};
+    public List<Vector3> SortMinMax(List<Vector3> Input, sortDimension dimension, minMax minValue)
+    {
+        List<Vector3> Result = new List<Vector3>();
+        while(Input.Count > 0)
+        {
+            float mV;
+            if (dimension == sortDimension.x)
+                mV = Input[0].x;
+            else if (dimension == sortDimension.y)
+                mV = Input[0].y;
+            else
+                mV = Input[0].z;
+            int mI = 0;
+            for(int i = 0; i < Input.Count; i++)
+            {
+                if (minValue == minMax.min)
+                {
+                    if (dimension == sortDimension.x)
+                    {
+                        if (Input[i].x < mV)
+                        {
+                            mV = Input[i].x;
+                            mI = i;
+                        }
+                    }
+                    else if (dimension == sortDimension.y)
+                    {
+                        if (Input[i].y < mV)
+                        {
+                            mV = Input[i].y;
+                            mI = i;
+                        }
+                    }
+                    else
+                    {
+                        if (Input[i].z < mV)
+                        {
+                            mV = Input[i].z;
+                            mI = i;
+                        }
+                    }
+                }
+                else
+                {
+                    if (dimension == sortDimension.x)
+                    {
+                        if (Input[i].x > mV)
+                        {
+                            mV = Input[i].x;
+                            mI = i;
+                        }
+                    }
+                    else if (dimension == sortDimension.y)
+                    {
+                        if (Input[i].y > mV)
+                        {
+                            mV = Input[i].y;
+                            mI = i;
+                        }
+                    }
+                    else
+                    {
+                        if (Input[i].z > mV)
+                        {
+                            mV = Input[i].z;
+                            mI = i;
+                        }
+                    }
+                }
+            }
+            Result.Add(Input[mI]);
+            Input.RemoveAt(mI);
+        }
+        return Result;
+    }
     public void MeldBlockIntoWorld()
     {
+        List<GameObject> results = new List<GameObject>();
         Vector3 Pnt = transform.position;
         Vector3Int ChunkPos = Vector3Int.FloorToInt(Pnt / 16f) * 16;
         Vector3Int BlockPos = Vector3Int.FloorToInt(Pnt) - ChunkPos;
-        GameObject GO;
-        Vector3[,,] CP = new Vector3[2, 2, 2];
-        List<Vector3> Min = new List<Vector3>();
+        Vector3 Delta = transform.position - ChunkPos - BlockPos;
+        
+        //transform points into new position of block
 
-
-        if (World.Chunks.TryGetValue(ChunkPos, out GO)){
-            ChunkObject CO = GO.GetComponent<ChunkObject>();
-            CO.GetBlock(BlockPos).Data = Block.Data;
-        }
-
-        List<GameObject> results = World.SetBlock(Vector3Int.RoundToInt(transform.position), new BlockClass(Block.Data.Type));
-        foreach (GameObject GO2 in results)
+        UnityEngine.Debug.Log("Transform Pos: "+transform.position);
+        for (int i = 0; i< Corners.Count; i++)
         {
-            GO2.GetComponent<ChunkObject>().Mesh();//.asyncReMeshChunk();
+            Quaternion T = transform.rotation;
+            Corners[i] = T * Corners[i];
+            CornersSource[i] = Vector3Int.RoundToInt(T * CornersSource[i]);
+            CornersSource[i] = new Vector3(Mathf.Clamp(CornersSource[i].x, -1, 0), Mathf.Clamp(CornersSource[i].y, -1, 0), Mathf.Clamp(CornersSource[i].z, -1, 0));
+            Corners[i] += Delta;
+        }
+        for (int i = 0; i < CornersSource.Count; i++)
+        {
+            Vector3 NewPos = ChunkPos + BlockPos + CornersSource[i];
+            UnityEngine.Debug.Log(CornersSource[i]);
+
+            BlockClass B = World.GetBlock(NewPos);
+            if (i == 0) //Origin Block 
+                B = Block;
+            B.Data.ControlPoint = Corners[i] - CornersSource[i];
+            results.AddRange(World.SetBlock(NewPos, B));
+        }
+            /*
+            Vector3[,,] Ordered = OrderPoints();
+            for (int i = 0; i < ChunkObject.FacePts.Length; i++)
+            {
+                Vector3 NewPos = ChunkPos + BlockPos + ChunkObject.FacePts[i];
+                BlockClass B = World.GetBlock(NewPos);
+                if (i == 0) //Origin Block 
+                    B = Block;
+                B.Data.ControlPoint = Ordered[ChunkObject.FacePts[i].x + 1, ChunkObject.FacePts[i].y + 1, ChunkObject.FacePts[i].z + 1] - ChunkObject.FacePts[i];
+                results.AddRange(World.SetBlock(NewPos, B));
+            }
+            */
+            foreach (GameObject GO2 in results)
+        {
+            GO2.GetComponent<ChunkObject>().Face();//.asyncReMeshChunk();
             GO2.GetComponent<ChunkObject>().postMesh();//.asyncReMeshChunk();
         }
-        GameObject.DestroyImmediate(this.gameObject);
+        GameObject.Destroy(this.gameObject);
     }
     void Start () {
 		
