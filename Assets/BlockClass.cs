@@ -79,7 +79,7 @@ public class BlockClass
 
         //[NOTE]: Static casting the Data.Type enumeration to byte limits you to 255 possible types and will fail silently.
         Data.Density = Density[(int) Data.Type];
-        Data.Blockiness = 255;// Blockiness[(int) Data.Type];
+        Data.Blockiness = Blockiness[(int) Data.Type];
         Data.Occlude = Occlude[(int) Data.Type];
         Data.ControlPoint = new Vector3(.5f, .5f, .5f);
     }
@@ -89,7 +89,7 @@ public class BlockClass
         Data.CPLocked = false;
         Data.Type = type;
         Data.Density = Density[(int) Data.Type];
-        Data.Blockiness = 255;// Blockiness[(int) Data.Type];
+        Data.Blockiness = Blockiness[(int) Data.Type];
         Data.Occlude = Occlude[(int) Data.Type];
     }
 

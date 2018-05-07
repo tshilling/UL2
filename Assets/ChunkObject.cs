@@ -22,8 +22,7 @@ public class ChunkObject : MonoBehaviour
 
     public bool Ready { get; set; }
     public int UpdateCount { get; set; }
-    public bool ReMeshRequired { get; set; }
-
+   
     public BlockClass[][][] Blocks
     {
         get { return _blocks; }
@@ -55,7 +54,8 @@ public class ChunkObject : MonoBehaviour
     private BlockClass[][][] _blocks;
 
     #endregion
-
+    public enum RemeshEnum {None=0, Face=1, Mesh=2, FaceUrgent=3,MeshUrgent=4};
+    public RemeshEnum RefreshRequired = RemeshEnum.None;
     
     // Status and states
     public ChunkObject()
@@ -64,7 +64,6 @@ public class ChunkObject : MonoBehaviour
         WaterGeometry = new GeometryData();
 
         Ready = false;
-        ReMeshRequired = false;
         UpdateCount = 0;
 
         _blocks = new BlockClass[WorldScript.ChunkSizeP2][][];
@@ -78,7 +77,6 @@ public class ChunkObject : MonoBehaviour
             }
         }
     }
-
 
     public GameObject GetBlockMesh(Vector3 Pnt)
     {
@@ -229,7 +227,11 @@ public class ChunkObject : MonoBehaviour
                                 sbyte.MaxValue);
                         }
                     }
-
+                    /*
+                    if (B.Data.Density <= 0)
+                        B.Data.Density = (sbyte) Mathf.Clamp(B.Data.Density, -126f, -1f);
+                    if (B.Data.Density >= 0)
+                        B.Data.Density = (sbyte)Mathf.Clamp(B.Data.Density, 1f, 127f);*/
                     B.Data.Blockiness = 1;
                     Blocks[X][Y][Z] = B;
                 }
@@ -365,6 +367,10 @@ public class ChunkObject : MonoBehaviour
     private BlockClass.BlockData CalcCP(int X, int Y, int Z)
     {
         BlockClass.BlockData Result = Blocks[X][Y][Z].Data;
+        if (Result.CPLocked)
+        {
+            return Result;
+        }
         Result.ControlPoint = new Vector3(0, 0, 0);
         byte EdgeCrossings = 0;
         BlockClass.BlockData[] Adjacent =

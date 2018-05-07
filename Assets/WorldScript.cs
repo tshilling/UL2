@@ -24,7 +24,7 @@ public class WorldScript : MonoBehaviour
 
     public WorldScript()
     {
-        WorldCreator.Init(1234);
+        //WorldCreator.Init(1234);
         //ChunkObject.myNoise.SetSeed(1234);
     }
 
@@ -85,7 +85,7 @@ public class WorldScript : MonoBehaviour
     int LoadCount = 0;
 
     Stopwatch WatchdogTimer = new Stopwatch();
-
+   
     private IEnumerator LoadInitScene()
     {
         Player.GetComponent<FirstPersonController>().Freeze();
@@ -122,7 +122,6 @@ public class WorldScript : MonoBehaviour
         yield return null;
     }
 
-
     private void OnChunkBuilt(ChunkObject chunk)
     {
         LoadCount++;
@@ -139,6 +138,22 @@ public class WorldScript : MonoBehaviour
     private int WorldUpdateCount = 0;
     private Stack<GameObject> Deactivated = new Stack<GameObject>();
     bool Updating = false;
+    private void CheckUrgentRefresh()
+    {
+        for(int i = 0; i < Chunks.Count; i++)
+        {
+            if(Chunks.Values.ElementAt(i).GetComponent<ChunkObject>().RefreshRequired == ChunkObject.RemeshEnum.FaceUrgent)
+            {
+                Chunks.Values.ElementAt(i).GetComponent<ChunkObject>().Face();
+                Chunks.Values.ElementAt(i).GetComponent<ChunkObject>().postMesh();
+            }
+            if (Chunks.Values.ElementAt(i).GetComponent<ChunkObject>().RefreshRequired == ChunkObject.RemeshEnum.MeshUrgent)
+            {
+                Chunks.Values.ElementAt(i).GetComponent<ChunkObject>().Mesh();
+                Chunks.Values.ElementAt(i).GetComponent<ChunkObject>().postMesh();
+            }
+        }
+    }
 
     private IEnumerator UpdateChunksVisible()
     {
@@ -156,12 +171,16 @@ public class WorldScript : MonoBehaviour
                 GameObject tempChunk;
                 if (Chunks.TryGetValue(WPt, out tempChunk))
                 {
-                    if (tempChunk.GetComponent<ChunkObject>().ReMeshRequired)
+                    if (tempChunk.GetComponent<ChunkObject>().RefreshRequired == ChunkObject.RemeshEnum.Face)
                     {
-                        tempChunk.GetComponent<ChunkObject>().asyncReMeshChunk();
+                        tempChunk.GetComponent<ChunkObject>().Face();
+                        tempChunk.GetComponent<ChunkObject>().postMesh();
                     }
-
-                    tempChunk.GetComponent<ChunkObject>().UpdateCount = WorldUpdateCount;
+                    if (tempChunk.GetComponent<ChunkObject>().RefreshRequired == ChunkObject.RemeshEnum.Mesh)
+                    {
+                        tempChunk.GetComponent<ChunkObject>().Mesh();
+                        tempChunk.GetComponent<ChunkObject>().postMesh();
+                    }
                 }
                 else
                 {
@@ -175,22 +194,19 @@ public class WorldScript : MonoBehaviour
                         {
                             GO.transform.position = WPt;
                             Chunks.Add(WPt, GO);
-                            WorldCreator.InitChunk(GO);
-                            GO.GetComponent<ChunkObject>().UpdateCount = WorldUpdateCount;
-                            //GO.SetActive(true);
-                            UnityEngine.Debug.Log("Grabbed deactivate: " + WPt);
+                            GO.GetComponent<ChunkObject>().asyncBuildChunk();
+                            GO.SetActive(true);
                         }
                     }
                     else
                     {
                         GameObject GO = Instantiate(baseChunk, new Vector3(WPt.x, WPt.y, WPt.z), Quaternion.identity);
-                        //GO.GetComponent<ChunkObject>().UpdateCount = WorldUpdateCount;
                         Chunks.Add(WPt, GO);
                         GO.GetComponent<ChunkObject>().asyncBuildChunk();
-                        //WorldCreator.InitChunk(GO);
                     }
                 }
 
+                CheckUrgentRefresh();
                 yield return null;
             }
 
@@ -210,6 +226,7 @@ public class WorldScript : MonoBehaviour
                     Chunks.Remove(Chunks.ElementAt(i).Key);
                     i--;
                 }
+                CheckUrgentRefresh();
             }
 
             Updating = false;
@@ -220,32 +237,11 @@ public class WorldScript : MonoBehaviour
 
     private void FixedUpdate()
     {
-        //########################## Remerge Loose Blocks ###########################
-        /*
-        for(int i = 0; i < LooseBlocks.Count; i++)
-        {
-            GameObject GO = LooseBlocks[i];
-            if(GO.GetComponent<Rigidbody>().velocity.sqrMagnitude < 0.001)  //Mesh not moving
-            {
-                List<GameObject> results = SetBlock(Vector3Int.RoundToInt(GO.transform.position), new BlockClass(BlockClass.BlockType.BedRock));
-                foreach (GameObject GO2 in results)
-                {
-                    GO2.GetComponent<ChunkObject>().asyncReMeshChunk();
-                    //GO.GetComponent<ChunkObject>().asyncReFaceChunk();
-                }
-                LooseBlocks.RemoveAt(i);
-                GameObject.DestroyImmediate(GO);
-                i--;
-            }
-            
-        }*/
-        //###########################################################################
+        //Test if player has moved into a new chunk
         Vector3Int Delta = Vector3Int.FloorToInt(LastPosition - Player.transform.position);
         if (Mathf.Abs(Delta.x) > ChunkSize | Mathf.Abs(Delta.z) > ChunkSize)
         {
             Vector3Int Pos = Vector3Int.FloorToInt(Player.transform.position / 16f) * 16;
-            //UpdateChunksVisible();
-
             StartCoroutine("UpdateChunksVisible");
             LastPosition = Pos;
         }
@@ -273,7 +269,9 @@ public class WorldScript : MonoBehaviour
                         List<GameObject> results = SetBlock(CP, B);
                         foreach (GameObject GO in results)
                         {
-                            WorldCreator.RefreshChunk(GO);
+                            GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.FaceUrgent;
+                            //GO.GetComponent<ChunkObject>().Face();//.Mesh();
+                            //GO.GetComponent<ChunkObject>().postMesh();
                         }
                     }
                 }
@@ -294,7 +292,10 @@ public class WorldScript : MonoBehaviour
                     List<GameObject> results = SetBlock(CP, new BlockClass(BlockClass.BlockType.Grass));
                     foreach (GameObject GO in results)
                     {
-                        WorldCreator.RefreshChunk(GO);
+
+                        //GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.MeshUrgent;
+                        GO.GetComponent<ChunkObject>().Mesh();
+                        GO.GetComponent<ChunkObject>().postMesh();
                     }
                 }
 
@@ -313,12 +314,16 @@ public class WorldScript : MonoBehaviour
                     {
                         tempBlock.transform.Translate(RH.normal); //Pop up so it doesn't fall through the world
                         List<GameObject> results = SetBlock(CP, NewB);
+
+                        PhysicsSeed = CP;
                         foreach (GameObject GO in results)
                         {
+                           // GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.MeshUrgent;
                             GO.GetComponent<ChunkObject>().Face();
                             GO.GetComponent<ChunkObject>().postMesh();
                             //GO.GetComponent<ChunkObject>().asyncReFaceChunk();
                         }
+                        StartCoroutine(UpdateVoxelPhysics());
                     }
 
                     LooseBlocks.Add(tempBlock);
@@ -363,11 +368,6 @@ public class WorldScript : MonoBehaviour
         {
             GameObject result = Instantiate(baseBlock, Pnt, Quaternion.identity);
             result.GetComponent<LooseBlockScript>().InitBlockFromWorld(this, Pnt);
-            //GameObject tempChunk;
-            //if (Chunks.TryGetValue(ChunkPos, out tempChunk))
-            //{
-            //    return tempChunk.GetComponent<ChunkObject>().GetBlockMesh(BlockPos);
-            //}
             return result;
         }
 
@@ -484,7 +484,13 @@ public class WorldScript : MonoBehaviour
 
         return Affected;
     }
+    Vector3Int PhysicsSeed = new Vector3Int();
 
+    private IEnumerator UpdateVoxelPhysics()
+    {
+        List<Vector3Int> Result = new List<Vector3Int>();
+        yield return null;
+    }
     private void LateUpdate()
     {
     }

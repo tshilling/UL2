@@ -10,6 +10,7 @@ public class LooseBlockScript : MonoBehaviour {
     List<Vector2> chunkUV = new List<Vector2>();
     List<Vector3> Corners = new List<Vector3>();
     List<Vector3> CornersSource = new List<Vector3>();
+
     // Use this for initialization
     public void InitBlockFromWorld(WorldScript world, Vector3 Pnt)
     {
@@ -25,14 +26,12 @@ public class LooseBlockScript : MonoBehaviour {
             if (world.Chunks.TryGetValue(ChunkPos, out tempChunk))
             {
                 ChunkObject CO = tempChunk.GetComponent<ChunkObject>();
-                UnityEngine.Debug.Log("#### Pop a block: ####");
                 Block = CO.GetBlock(BlockPos);
                 for(int i = 0; i < 8; i++) { 
                     Corners.Add(CO.GetBlock(BlockPos + BlockProperties.FacePts[i]).Data.ControlPoint+ BlockProperties.FacePts[i]);
-                    CornersSource.Add(BlockProperties.FacePts[i]);
+                    CO.GetBlock(BlockPos + BlockProperties.FacePts[i]).Data.CPLocked = true;
+                    CornersSource.Add(BlockProperties.FacePts[i]+new Vector3(0.5f,0.5f,0.5f));
                 }
-                UnityEngine.Debug.Log("######################");
-
                 chunkVertices.Clear();
                 chunkTriangles.Clear();
                 chunkUV.Clear();
@@ -84,6 +83,7 @@ public class LooseBlockScript : MonoBehaviour {
             }
         }
     }
+    /*
     public Vector3[,,] OrderPoints()
     {
         UnityEngine.Debug.Log("Point Count: " + Corners.Count);
@@ -147,6 +147,7 @@ public class LooseBlockScript : MonoBehaviour {
     }
     public enum sortDimension {x=0,y=1,z=2 };
     public enum minMax { min=0,max=1};
+
     public List<Vector3> SortMinMax(List<Vector3> Input, sortDimension dimension, minMax minValue)
     {
         List<Vector3> Result = new List<Vector3>();
@@ -222,58 +223,47 @@ public class LooseBlockScript : MonoBehaviour {
         }
         return Result;
     }
+    */
     public void MeldBlockIntoWorld()
     {
-        List<GameObject> results = new List<GameObject>();
+        List<GameObject> AffectedChunks = new List<GameObject>();
         Vector3 Pnt = transform.position;
-        Vector3Int ChunkPos = Vector3Int.FloorToInt(Pnt / 16f) * 16;
-        Vector3Int BlockPos = Vector3Int.FloorToInt(Pnt) - ChunkPos;
-        Vector3 Delta = transform.position - ChunkPos - BlockPos;
-        
+
         //transform points into new position of block
 
-        UnityEngine.Debug.Log("Transform Pos: "+transform.position);
-        for (int i = 0; i< Corners.Count; i++)
+        UnityEngine.Debug.Log("Transform Pos: " + transform.position);
+
+
+        Quaternion T = transform.rotation;
+        for (int i = 0; i < Corners.Count; i++)
         {
-            Quaternion T = transform.rotation;
             Corners[i] = T * Corners[i];
-            CornersSource[i] = Vector3Int.RoundToInt(T * CornersSource[i]);
-            CornersSource[i] = new Vector3(Mathf.Clamp(CornersSource[i].x, -1, 0), Mathf.Clamp(CornersSource[i].y, -1, 0), Mathf.Clamp(CornersSource[i].z, -1, 0));
-            Corners[i] += Delta;
+            CornersSource[i] = T * CornersSource[i] - new Vector3(0.5f, 0.5f, 0.5f);
         }
+
+        Vector3Int ChunkPos = Vector3Int.FloorToInt(Pnt / 16f) * 16;
+        Vector3Int BlockPos = Vector3Int.RoundToInt(Pnt) - ChunkPos;
+        Vector3 Delta = transform.position - ChunkPos - BlockPos;
         for (int i = 0; i < CornersSource.Count; i++)
         {
+            CornersSource[i] = Vector3Int.RoundToInt(CornersSource[i]);
+            Corners[i] += Delta;
             Vector3 NewPos = ChunkPos + BlockPos + CornersSource[i];
-            UnityEngine.Debug.Log(CornersSource[i]);
-
             BlockClass B = World.GetBlock(NewPos);
-            if (i == 0) //Origin Block 
+            if (CornersSource[i].x == 0 & CornersSource[i].y==0 & CornersSource[i].z==0)
                 B = Block;
+            B.Data.CPLocked = true;
             B.Data.ControlPoint = Corners[i] - CornersSource[i];
-            results.AddRange(World.SetBlock(NewPos, B));
+            AffectedChunks.AddRange(World.SetBlock(NewPos, B));
         }
-            /*
-            Vector3[,,] Ordered = OrderPoints();
-            for (int i = 0; i < ChunkObject.FacePts.Length; i++)
-            {
-                Vector3 NewPos = ChunkPos + BlockPos + ChunkObject.FacePts[i];
-                BlockClass B = World.GetBlock(NewPos);
-                if (i == 0) //Origin Block 
-                    B = Block;
-                B.Data.ControlPoint = Ordered[ChunkObject.FacePts[i].x + 1, ChunkObject.FacePts[i].y + 1, ChunkObject.FacePts[i].z + 1] - ChunkObject.FacePts[i];
-                results.AddRange(World.SetBlock(NewPos, B));
-            }
-            */
-            foreach (GameObject GO2 in results)
+
+        foreach (GameObject GO2 in AffectedChunks)
         {
-            GO2.GetComponent<ChunkObject>().Face();//.asyncReMeshChunk();
-            GO2.GetComponent<ChunkObject>().postMesh();//.asyncReMeshChunk();
+            GO2.GetComponent<ChunkObject>().Mesh();
+            GO2.GetComponent<ChunkObject>().postMesh();
         }
         GameObject.Destroy(this.gameObject);
     }
-    void Start () {
-		
-	}
 
     // Update is called once per frame
     int stableCount = 0;
@@ -287,10 +277,9 @@ public class LooseBlockScript : MonoBehaviour {
                 MeldBlockIntoWorld();
             }
         }
-        if (GetComponent<Rigidbody>().velocity.sqrMagnitude > 200)  //Mesh not moving
+        if (GetComponent<Rigidbody>().velocity.sqrMagnitude > 200)  //Mesh moving away fast
         {
-            GameObject.DestroyImmediate(this.gameObject);
-
+            GameObject.Destroy(this.gameObject);
         }
     }
 }
