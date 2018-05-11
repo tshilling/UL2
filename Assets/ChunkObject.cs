@@ -303,20 +303,14 @@ public class ChunkObject : MonoBehaviour
                 for (int X = 0; X < WorldScript.ChunkSize; X++)
                 {
                     Vector3Int V = new Vector3Int(X, Y, Z);
-                    // if (GetBlock(V).Data.Density > 0)
                     if (GetBlock(V).Data.Type == BlockClass.BlockType.Water)
                     {
                         for (byte Dir = 0; Dir < 6; Dir++)
                         {
-                            if ((GetBlock(V + BlockProperties.DirectionVector[Dir]).Data.Type != BlockClass.BlockType.Water))
+                            if ((GetBlock(V + BlockProperties.DirectionVector[Dir]).Data.Type == BlockClass.BlockType.Air))
                             {
-                                //byte B1 = (byte)(GetBlock(V + DirectionVector[Dir]).Data.Occlude & (1 << (5 - Dir)));
-                                //if (B1 == 0)
                                 AddFaceWater(Dir, V);
                             }
-
-                            //if (GetBlock(V + DirectionVector[Dir]).Data.Density <= 0)
-                            //    AddFace(Dir, V);
                         }
                     }
                     else
@@ -331,8 +325,6 @@ public class ChunkObject : MonoBehaviour
                                     AddFace(Dir, V);
                             }
 
-                            //if (GetBlock(V + DirectionVector[Dir]).Data.Density <= 0)
-                            //    AddFace(Dir, V);
                         }
                     }
                 }
@@ -358,7 +350,7 @@ public class ChunkObject : MonoBehaviour
         WaterMeshData.vertices = WaterGeometry.Vertices.ToArray();
         WaterMeshData.triangles = WaterGeometry.Triangles.ToArray();
         WaterMeshData.uv = WaterGeometry.UV.ToArray();
-        WaterMeshData.RecalculateNormals();
+        WaterMeshData.normals = WaterGeometry.Normals.ToArray();//.RecalculateNormals();
         WaterCollider.sharedMesh = WaterMeshData;
 
         Ready = true;
@@ -427,10 +419,15 @@ public class ChunkObject : MonoBehaviour
         {
             Vector3Int Blk = Center + BlockProperties.FacePts[BlockProperties.BlockFaces[Dir, i]];
             LandGeometry.Vertices.Add(Blk + _blocks[Blk.x + 1][Blk.y + 1][Blk.z + 1].Data.ControlPoint);
+            LandGeometry.Normals.Add(BlockProperties.DirectionVector[Dir]);
         }
 
         Vector3 V1 = LandGeometry.Vertices[LandGeometry.Vertices.Count - 1] - LandGeometry.Vertices[LandGeometry.Vertices.Count - 2];
         Vector3 V2 = LandGeometry.Vertices[LandGeometry.Vertices.Count - 3] - LandGeometry.Vertices[LandGeometry.Vertices.Count - 2];
+        Vector3 C1 = (LandGeometry.Vertices[LandGeometry.Vertices.Count - 1] + LandGeometry.Vertices[LandGeometry.Vertices.Count - 3]) / 2f;
+        Vector3 C2 = (LandGeometry.Vertices[LandGeometry.Vertices.Count - 2] + LandGeometry.Vertices[LandGeometry.Vertices.Count - 4]) / 2f;
+        float D1 = (C1 - Center).sqrMagnitude;
+        float D2 = (C2 - Center).sqrMagnitude;
         Vector3 N = Vector3.Cross(V1, V2).normalized;
         if (N.y > .3)
         {
@@ -438,12 +435,26 @@ public class ChunkObject : MonoBehaviour
         }
 
         int sc = LandGeometry.Vertices.Count - 4; // squareCount << 2;//Multiply by 4
-        LandGeometry.Triangles.Add(sc);
-        LandGeometry.Triangles.Add(sc + 1);
-        LandGeometry.Triangles.Add(sc + 3);
-        LandGeometry.Triangles.Add(sc + 1);
-        LandGeometry.Triangles.Add(sc + 2);
-        LandGeometry.Triangles.Add(sc + 3);
+
+        if (D1 > D2)
+        {
+            LandGeometry.Triangles.Add(sc);
+            LandGeometry.Triangles.Add(sc + 1);
+            LandGeometry.Triangles.Add(sc + 3);
+            LandGeometry.Triangles.Add(sc + 1);
+            LandGeometry.Triangles.Add(sc + 2);
+            LandGeometry.Triangles.Add(sc + 3);
+        }
+        else
+        {
+            LandGeometry.Triangles.Add(sc);
+            LandGeometry.Triangles.Add(sc + 1);
+            LandGeometry.Triangles.Add(sc + 2);
+            LandGeometry.Triangles.Add(sc);
+            LandGeometry.Triangles.Add(sc + 2);
+            LandGeometry.Triangles.Add(sc + 3);
+
+        }
         Vector2[] V = CB.GetTex();
 
         Vector2 uv = new Vector2(V[Dir].x / 16f, (15 - V[Dir].y) / 16f);
@@ -465,6 +476,7 @@ public class ChunkObject : MonoBehaviour
             //if(Dir== 0)
             //CP.y = 0f;
             WaterGeometry.Vertices.Add(Blk + CP);
+            LandGeometry.Normals.Add(BlockProperties.DirectionVector[Dir]);
         }
 
         int sc = WaterGeometry.Vertices.Count - 4; // squareCount << 2;//Multiply by 4

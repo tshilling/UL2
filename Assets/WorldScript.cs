@@ -158,8 +158,8 @@ public class WorldScript : MonoBehaviour
     private IEnumerator UpdateChunksVisible()
     {
         //Updating = true;
-        if (!Updating)
-        {
+        //if (!Updating)
+        //{
             Updating = true;
             WorldUpdateCount++;
 
@@ -230,7 +230,7 @@ public class WorldScript : MonoBehaviour
             }
 
             Updating = false;
-        }
+        //}
 
         yield return null;
     }
@@ -251,6 +251,16 @@ public class WorldScript : MonoBehaviour
         Transform FPC = Player.transform.GetChild(0);
         if (FPC != null)
         {
+            BlockClass BC = GetBlock(FPC.position);
+            if(BC.Data.Type == BlockClass.BlockType.Water)
+            {
+                FPC.gameObject.GetComponent<UnderWater>().Under = true;
+            }
+            else
+            {
+
+                FPC.gameObject.GetComponent<UnderWater>().Under = false;
+            }
             Physics.Raycast(FPC.position, FPC.forward, out RH);
             if (RH.distance < 10)
             {

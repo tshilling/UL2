@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: LowPolyWater
-  m_Shader: {fileID: 4800000, guid: c5617dffeb9944fa3a50334e9f9f8c5e, type: 3}
+  m_Shader: {fileID: 4800000, guid: 952769cfaad03a44b92758a3ae3a6447, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
@@ -34,6 +34,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Diffuse:
+        m_Texture: {fileID: 2800000, guid: 66321cc856b03e245ac41ed8a53e0ecc, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _DistortionTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -42,12 +46,20 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _FoamTexture:
+        m_Texture: {fileID: 2800000, guid: bfb644102ac36764787aab972f0b8793, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Normal:
+        m_Texture: {fileID: 2800000, guid: cb6c5165ed180c543be39ed70e72abc8, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -62,14 +74,40 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _WaveDistortionNoise:
+        m_Texture: {fileID: 2800000, guid: fc597129e2152974c9542c0caaed9413, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_2716:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_3854:
+        m_Texture: {fileID: 2800000, guid: fc597129e2152974c9542c0caaed9413, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _node_4547:
+        m_Texture: {fileID: 2800000, guid: bfb644102ac36764787aab972f0b8793, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
     - _BumpScale: 1
     - _Cutoff: 0.5
+    - _Depth: 4.37
+    - _DepthBlendWater: 2
+    - _DepthMax: 0.748
+    - _DepthMin: 0.513
     - _DetailNormalMapScale: 1
-    - _DistortionPower: 4
+    - _DistortionPower: 10
     - _DstBlend: 0
-    - _FresnelScale: 0.99
+    - _FoamDistance: 5
+    - _FoamMax: 0.984
+    - _FoamMin: 0.287
+    - _FoamPower: 8.3
+    - _FoamStrength: 4
+    - _FresnelScale: 0.85
     - _GerstnerIntensity: 1
+    - _Gloss: 0.8
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -78,25 +116,48 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _Periodisity: 0.1
     - _Shininess: 200
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _TargetValue: 0.496
+    - _Tesselation: 1.13
     - _TimeScale1: 30
     - _TimeScale2: 5
+    - _Trans: 5
+    - _TransDepth: 3.8
+    - _TransMax: 0.965
+    - _TransMin: 0.43
+    - _Trans_copy: 0.1
     - _TresholdDensity: 20
     - _TresholdFalloff: 1.2
     - _UVSec: 0
+    - _WaveAmplitude: 0.2
+    - _WaveAmplitude_copy: 0.2
+    - _WaveAmplitude_copy_copy: 0.2
+    - _WaveCount: 1
+    - _WaveFrequency: 2
+    - _WaveHeight: 0.53
+    - _WaveSpeed: 20
+    - _WaveSpread: 0.2
+    - _WaveWidth: 0.1
     - _WavesDensity: 10
+    - _YOffset: 0
     - _ZWrite: 1
+    - _node_1923: 10
+    - _node_3572: 1.54
+    - _node_6200: 2
     m_Colors:
     - _AnimationDirection: {r: 1, g: 1, b: 1, a: 1}
     - _AnimationTiling: {r: 2.2, g: 2.2, b: -1.1, a: -1.1}
     - _BaseColor: {r: 0.19272874, g: 0.29680794, b: 0.5754717, a: 0.5}
     - _BumpDirection: {r: 1, g: 1, b: -1, a: 1}
     - _BumpTiling: {r: 1, g: 1, b: -2, a: 3}
-    - _Color: {r: 0.3897059, g: 0.14613971, b: 0.14613971, a: 1}
+    - _Color: {r: 0.36378607, g: 0.6167037, b: 0.7075472, a: 1}
+    - _ColorA: {r: 0.1, g: 0, b: 1, a: 1}
+    - _ColorB: {r: 0.29503384, g: 0.6589776, b: 0.9622642, a: 1}
+    - _Color_copy: {r: 0.3, g: 0, b: 1, a: 1}
     - _DistortParams: {r: 1, g: 1, b: 2, a: 1.15}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _GAmplitude: {r: 0.05, g: 0.05, b: 0.05, a: 0.05}
@@ -110,6 +171,8 @@ Material:
     - _SpecularColor: {r: 0.37110725, g: 0.5442012, b: 0.9705882, a: 1}
     - _WavesColor: {r: 0.47577852, g: 0.51378113, b: 0.58823526, a: 0.25}
     - _WorldLightDir: {r: 0, g: 0.1, b: -0.5, a: 0}
+    - _node_2616: {r: 0, g: 0, b: 0.5, a: 1}
+    - _node_8225: {r: 0.2352941, g: 0.55614763, b: 0.67058825, a: 1}
 --- !u!1002 &2100001
 EditorExtensionImpl:
   serializedVersion: 6

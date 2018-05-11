@@ -83,7 +83,7 @@ public class LooseBlockScript : MonoBehaviour {
             }
         }
     }
-    /*
+
     public Vector3[,,] OrderPoints()
     {
         UnityEngine.Debug.Log("Point Count: " + Corners.Count);
@@ -97,51 +97,51 @@ public class LooseBlockScript : MonoBehaviour {
         List<Vector3> MinX = SortMinMax(Input, sortDimension.x, minMax.min);
         List<Vector3> MaxX = MinX.GetRange(4, 4);
         MinX.RemoveRange(4, 4);
-        List<Vector3> MinXMinY = SortMinMax(MinX, sortDimension.y, minMax.min);
-        List<Vector3> MinXMaxY = MinXMinY.GetRange(2,2);
-        MinXMinY.RemoveRange(2,2);
-        List<Vector3> MaxXMinY = SortMinMax(MaxX, sortDimension.y, minMax.min);
-        List<Vector3> MaxXMaxY = MaxXMinY.GetRange(2, 2);
-        MaxXMinY.RemoveRange(2, 2);
-        if (MinXMinY[0].z < MinXMinY[1].z)
+        List<Vector3> MinXMinZ = SortMinMax(MinX, sortDimension.z, minMax.min);
+        List<Vector3> MinXMaxZ = MinXMinZ.GetRange(2,2);
+        MinXMinZ.RemoveRange(2,2);
+        List<Vector3> MaxXMinZ = SortMinMax(MaxX, sortDimension.z, minMax.min);
+        List<Vector3> MaxXMaxZ = MaxXMinZ.GetRange(2, 2);
+        MaxXMinZ.RemoveRange(2, 2);
+        if (MinXMinZ[0].y < MinXMinZ[1].y)
         {
-            Result[0, 0, 0] = MinXMinY[0];
-            Result[0, 0, 1] = MinXMinY[1];
+            Result[0, 0, 0] = MinXMinZ[0];
+            Result[0, 1, 0] = MinXMinZ[1];
         }
         else
         {
-            Result[0, 0, 0] = MinXMinY[1];
-            Result[0, 0, 1] = MinXMinY[0];
+            Result[0, 0, 0] = MinXMinZ[1];
+            Result[0, 1, 0] = MinXMinZ[0];
         }
-        if (MinXMaxY[0].z < MinXMaxY[1].z)
+        if (MinXMaxZ[0].y < MinXMaxZ[1].y)
         {
-            Result[0, 1, 0] = MinXMaxY[0];
-            Result[0, 1, 1] = MinXMaxY[1];
-        }
-        else
-        {
-            Result[0, 1, 0] = MinXMaxY[1];
-            Result[0, 1, 1] = MinXMaxY[0];
-        }
-        if (MaxXMinY[0].z < MaxXMinY[1].z)
-        {
-            Result[1, 0, 0] = MaxXMinY[0];
-            Result[1, 0, 1] = MaxXMinY[1];
+            Result[0, 0, 1] = MinXMaxZ[0];
+            Result[0, 1, 1] = MinXMaxZ[1];
         }
         else
         {
-            Result[1, 0, 0] = MaxXMinY[1];
-            Result[1, 0, 1] = MaxXMinY[0];
+            Result[0, 0, 1] = MinXMaxZ[1];
+            Result[0, 1, 1] = MinXMaxZ[0];
         }
-        if (MaxXMaxY[0].z < MaxXMaxY[1].z)
+        if (MaxXMinZ[0].y < MaxXMinZ[1].y)
         {
-            Result[1, 1, 0] = MaxXMaxY[0];
-            Result[1, 1, 1] = MaxXMaxY[1];
+            Result[1, 0, 0] = MaxXMinZ[0];
+            Result[1, 1, 0] = MaxXMinZ[1];
         }
         else
         {
-            Result[1, 1, 0] = MaxXMaxY[1];
-            Result[1, 1, 1] = MaxXMaxY[0];
+            Result[1, 0, 0] = MaxXMinZ[1];
+            Result[1, 1, 0] = MaxXMinZ[0];
+        }
+        if (MaxXMaxZ[0].y < MaxXMaxZ[1].y)
+        {
+            Result[1, 0, 1] = MaxXMaxZ[0];
+            Result[1, 1, 1] = MaxXMaxZ[1];
+        }
+        else
+        {
+            Result[1, 0, 1] = MaxXMaxZ[1];
+            Result[1, 1, 1] = MaxXMaxZ[0];
         }
         return Result;
     }
@@ -223,7 +223,6 @@ public class LooseBlockScript : MonoBehaviour {
         }
         return Result;
     }
-    */
     public void MeldBlockIntoWorld()
     {
         List<GameObject> AffectedChunks = new List<GameObject>();
@@ -248,6 +247,7 @@ public class LooseBlockScript : MonoBehaviour {
         {
             CornersSource[i] = Vector3Int.RoundToInt(CornersSource[i]);
             Corners[i] += Delta;
+            //Corners[i] = new Vector3(Mathf.Clamp01(Corners[i].x), Mathf.Clamp01(Corners[i].y), Mathf.Clamp01(Corners[i].z));
             Vector3 NewPos = ChunkPos + BlockPos + CornersSource[i];
             BlockClass B = World.GetBlock(NewPos);
             if (CornersSource[i].x == 0 & CornersSource[i].y==0 & CornersSource[i].z==0)
@@ -264,7 +264,46 @@ public class LooseBlockScript : MonoBehaviour {
         }
         GameObject.Destroy(this.gameObject);
     }
+    public void MeldBlockIntoWorldV2()
+    {
+        List<GameObject> AffectedChunks = new List<GameObject>();
+        Vector3 Pnt = transform.position;
+        Pnt.x = Mathf.Round(Pnt.x);
+        Pnt.y = Mathf.Round(Pnt.y);
+        Pnt.z = Mathf.Round(Pnt.z);
+        // In order to get the chunk that coorisponds to the correct block, PNT must be rounded prior to the next operation
+        Vector3Int ChunkPos = Vector3Int.FloorToInt(Pnt / 16f) * 16;
+        Vector3Int BlockPos = Vector3Int.RoundToInt(Pnt) - ChunkPos;
 
+        // Apply the blocks resulting transformation to each point of the original block
+        Quaternion T = transform.rotation;
+        for (int i = 0; i < Corners.Count; i++)
+        {
+            Corners[i] = T * Corners[i];
+        }
+        Vector3[,,] Results = OrderPoints();
+        Vector3 Delta = transform.position - ChunkPos - BlockPos;
+        for(int i = 0; i < BlockProperties.FacePts.Length; i++)
+        {
+            Vector3Int V = BlockProperties.FacePts[i];
+            Vector3 NewPos = ChunkPos + BlockPos + V;
+            BlockClass B = World.GetBlock(NewPos);
+            if (i == 0)
+                B = Block;
+            B.Data.ControlPoint = Results[V.x + 1, V.y + 1, V.z + 1] - V + Delta;
+            B.Data.ControlPoint.x = Mathf.Clamp01(B.Data.ControlPoint.x);
+            B.Data.ControlPoint.y = Mathf.Clamp01(B.Data.ControlPoint.y);
+            B.Data.ControlPoint.z = Mathf.Clamp01(B.Data.ControlPoint.z);
+            B.Data.CPLocked = true;
+            AffectedChunks.AddRange(World.SetBlock(NewPos, B));
+        }
+        foreach (GameObject GO2 in AffectedChunks)
+        {
+            GO2.GetComponent<ChunkObject>().Mesh();
+            GO2.GetComponent<ChunkObject>().postMesh();
+        }
+        GameObject.Destroy(this.gameObject);
+    }
     // Update is called once per frame
     int stableCount = 0;
     void Update()
@@ -274,7 +313,7 @@ public class LooseBlockScript : MonoBehaviour {
             stableCount++;
             if (stableCount > 100)
             {
-                MeldBlockIntoWorld();
+                MeldBlockIntoWorldV2();
             }
         }
         if (GetComponent<Rigidbody>().velocity.sqrMagnitude > 200)  //Mesh moving away fast

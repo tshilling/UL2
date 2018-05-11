@@ -38,11 +38,11 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 0}
       propertyPath: m_CastShadows
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 0}
       propertyPath: m_LightProbeUsage
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 0}
       propertyPath: m_ReflectionProbeUsage
@@ -51,6 +51,14 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: m_MotionVectors
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_StitchLightmapSeams
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
@@ -134,6 +142,7 @@ MeshRenderer:
   m_MotionVectors: 0
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
   m_Materials:
   - {fileID: 2100000, guid: cb7ac7de6b1ee874fa42e88d5599add5, type: 2}
   m_StaticBatchInfo:
@@ -162,12 +171,13 @@ MeshRenderer:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1121531270686624}
   m_Enabled: 1
-  m_CastShadows: 2
+  m_CastShadows: 0
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_MotionVectors: 2
-  m_LightProbeUsage: 0
+  m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 0
+  m_RenderingLayerMask: 4294967295
   m_Materials:
   - {fileID: 2100000, guid: ab1da99860ff74744a5d26b5cc9ff781, type: 2}
   m_StaticBatchInfo:
@@ -257,12 +267,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d06cf28adb06e04eb350dde0ff9be4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseBlock: {fileID: 1887791439374962, guid: 6f761e4f7cfaebb4f84b14b390d560de, type: 2}
-  ready: 0
-  UpdateCount: 0
+  BaseBlock: {fileID: 0}
   Water: {fileID: 0}
-  mesh: {fileID: 0}
-  col: {fileID: 0}
-  waterMesh: {fileID: 0}
-  waterCol: {fileID: 0}
-  reMeshRequired: 0
+  LandMeshData: {fileID: 0}
+  LandMeshCollider: {fileID: 0}
+  WaterMeshData: {fileID: 0}
+  WaterCollider: {fileID: 0}
+  RefreshRequired: 0
