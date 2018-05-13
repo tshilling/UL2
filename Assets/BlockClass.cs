@@ -13,7 +13,7 @@ public class BlockClass
         South = 4,
         Down = 5
     };
-
+    public int SearchMarker = 0; // Used for Physics Engine
     /// <summary>
     /// The psuedo-material that the current block represents. The default assignment is BlockType.Air.
     /// </summary>

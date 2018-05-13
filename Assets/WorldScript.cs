@@ -279,9 +279,9 @@ public class WorldScript : MonoBehaviour
                         List<GameObject> results = SetBlock(CP, B);
                         foreach (GameObject GO in results)
                         {
-                            GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.FaceUrgent;
-                            //GO.GetComponent<ChunkObject>().Face();//.Mesh();
-                            //GO.GetComponent<ChunkObject>().postMesh();
+                            GO.GetComponent<ChunkObject>().Face();//.Mesh();
+                            GO.GetComponent<ChunkObject>().postMesh();
+                            //GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.FaceUrgent;
                         }
                     }
                 }
@@ -294,22 +294,46 @@ public class WorldScript : MonoBehaviour
                     Target.transform.position = Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
                 }
 
-                if (Input.GetMouseButtonUp(1))
+                if (Input.GetMouseButtonUp(1))  // Set Block
                 {
+                    List<GameObject> results = new List<GameObject>();
                     Target.transform.position = Vector3Int.RoundToInt(RH.point + RH.normal * .5f);
                     Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
 
-                    List<GameObject> results = SetBlock(CP, new BlockClass(BlockClass.BlockType.Grass));
+                    PhysicsEngine.FillRTNType R = PhysicsEngine.FillSearchBlocks(this, CP, 4);
+                    UnityEngine.Debug.Log("Fill Performed: ");
+                    UnityEngine.Debug.Log("Blocks Found: "+R.Blocks.Count+" : "+R.MaxDepthFound);
+                    for (int i = 0; i < R.Position.Count; i++)
+                    {
+                        CP = R.Position[i];
+                        //GameObject tempBlock = GetBlockMesh(CP); // Extract Block from Mesh
+                        BlockClass LastB = GetBlock(CP);
+                        BlockClass NewB = new BlockClass(BlockClass.BlockType.Water);
+                        NewB.Data.Blockiness = LastB.Data.Blockiness;
+                        NewB.Data.Density = LastB.Data.Density;
+                        NewB.Data.ControlPoint = LastB.Data.ControlPoint;
+                        
+                        //BlockClass B = R.Blocks[i];
+                        //B.Data.Type = BlockClass.BlockType.Water;
+                        List<GameObject> r2 = SetBlock(CP, NewB);
+                        foreach(GameObject GO in r2)
+                        {
+                            if (!results.Contains(GO))
+                            {
+                                results.Add(GO);
+                            }
+                        }
+                    }
+                    
                     foreach (GameObject GO in results)
                     {
-
                         //GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.MeshUrgent;
                         GO.GetComponent<ChunkObject>().Mesh();
                         GO.GetComponent<ChunkObject>().postMesh();
                     }
                 }
 
-                if (Input.GetMouseButtonUp(0))
+                if (Input.GetMouseButtonUp(0))  // Destroy Block
                 {
                     Target.transform.position = Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
                     Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
