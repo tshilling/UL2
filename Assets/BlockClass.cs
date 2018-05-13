@@ -25,7 +25,6 @@ public class BlockClass
         Grass = 3,
         Water = 4
     };
-
     // Provides BlockType information for each face of a six-sided cube, but what do the Y component of Vector2 represent?
     public static Vector2[][] Texture = new[]
     {
@@ -56,7 +55,7 @@ public class BlockClass
         }, //Air
     };
 
-    public static byte[] Blockiness = { 0, 255, 255, 0, 1 };
+    public static byte[] Blockiness = { 0, 255, 255, 255, 1 };
     public static sbyte[] Density = { -126, 127, 127, 127, -127 };
     public static byte[] Occlude = { 0, 63, 63, 63, 0 };
 
@@ -68,6 +67,7 @@ public class BlockClass
         public BlockType Type;
         public Vector3 ControlPoint;
         public bool CPLocked;
+        public bool isSolid;
     }
 
     public BlockData Data;
@@ -76,7 +76,7 @@ public class BlockClass
     {
         Data.CPLocked = false;
         Data.Type = BlockType.Air;
-
+        Data.isSolid = false;
         //[NOTE]: Static casting the Data.Type enumeration to byte limits you to 255 possible types and will fail silently.
         Data.Density = Density[(int) Data.Type];
         Data.Blockiness = Blockiness[(int) Data.Type];
@@ -91,6 +91,14 @@ public class BlockClass
         Data.Density = Density[(int) Data.Type];
         Data.Blockiness = Blockiness[(int) Data.Type];
         Data.Occlude = Occlude[(int) Data.Type];
+        if(type == BlockType.Air | type == BlockType.Water)
+        {
+            Data.isSolid = false;
+        }
+        else
+        {
+            Data.isSolid = true;
+        }
     }
 
     public Vector2[] GetTex()

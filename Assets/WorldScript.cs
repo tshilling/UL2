@@ -10,6 +10,8 @@ using UnityStandardAssets.Characters.FirstPerson;
 
 public class WorldScript : MonoBehaviour
 {
+    public Material TargetMaterial1;
+    public Material TargetMaterial2;
     public GameObject baseChunk;
     public GameObject Player;
     public GameObject Target;
@@ -24,8 +26,6 @@ public class WorldScript : MonoBehaviour
 
     public WorldScript()
     {
-        //WorldCreator.Init(1234);
-        //ChunkObject.myNoise.SetSeed(1234);
     }
 
     // Use this for initialization
@@ -39,8 +39,6 @@ public class WorldScript : MonoBehaviour
 
     void Start()
     {
-        //Player = GameObject.Find("FirstPersonCharacter");
-        //Target = GameObject.Find("TargetCube");
         LoadScene();
     }
 
@@ -118,7 +116,7 @@ public class WorldScript : MonoBehaviour
         UnityEngine.Debug.Log("Done Loading");
         loadingSlider.gameObject.SetActive(false);
         Player.GetComponent<FirstPersonController>().UnFreeze();
-
+        StartCoroutine(UpdateWorld());
         yield return null;
     }
 
@@ -138,86 +136,76 @@ public class WorldScript : MonoBehaviour
     private int WorldUpdateCount = 0;
     private Stack<GameObject> Deactivated = new Stack<GameObject>();
     bool Updating = false;
-    private void CheckUrgentRefresh()
+    private void CheckIfUpdateRequired(GameObject GO)
     {
-        for(int i = 0; i < Chunks.Count; i++)
+        ChunkObject CO = GO.GetComponent<ChunkObject>();
+        if (CO.RefreshRequired == ChunkObject.RemeshEnum.FaceUrgent | CO.RefreshRequired == ChunkObject.RemeshEnum.Face)
         {
-            if(Chunks.Values.ElementAt(i).GetComponent<ChunkObject>().RefreshRequired == ChunkObject.RemeshEnum.FaceUrgent)
-            {
-                Chunks.Values.ElementAt(i).GetComponent<ChunkObject>().Face();
-                Chunks.Values.ElementAt(i).GetComponent<ChunkObject>().postMesh();
-            }
-            if (Chunks.Values.ElementAt(i).GetComponent<ChunkObject>().RefreshRequired == ChunkObject.RemeshEnum.MeshUrgent)
-            {
-                Chunks.Values.ElementAt(i).GetComponent<ChunkObject>().Mesh();
-                Chunks.Values.ElementAt(i).GetComponent<ChunkObject>().postMesh();
-            }
+            CO.Face();
+            CO.postMesh();
         }
+        if (CO.RefreshRequired == ChunkObject.RemeshEnum.MeshUrgent | CO.RefreshRequired == ChunkObject.RemeshEnum.Mesh)
+        {
+            CO.Mesh();
+            CO.postMesh();
+        }
+        CO.RefreshRequired = ChunkObject.RemeshEnum.None;
     }
-
-    private IEnumerator UpdateChunksVisible()
+    private void LoadNewChunk(Vector3Int WPt)
     {
-        //Updating = true;
-        //if (!Updating)
-        //{
-            Updating = true;
-            WorldUpdateCount++;
+        if (Deactivated.Count > 0)
+        {
+            GameObject GO = Deactivated.Pop();
+            GO.SetActive(false);
+            GO.transform.position = WPt;
+            Chunks.Add(WPt, GO);
+            GO.GetComponent<ChunkObject>().asyncBuildChunk();
+            GO.SetActive(true);
+        }
+        else
+        {
+            GameObject GO = Instantiate(baseChunk, new Vector3(WPt.x, WPt.y, WPt.z), Quaternion.identity);
+            Chunks.Add(WPt, GO);
+            GO.GetComponent<ChunkObject>().asyncBuildChunk();
+        }
 
-            Vector3Int Pos = Vector3Int.FloorToInt(Player.transform.position / 16f) * 16;
-            Pos.y = 0;
-            foreach (Vector3Int V in RenderList)
+    }
+    private IEnumerator UpdateWorld()
+    {
+        Stopwatch SW = new Stopwatch();
+        SW.Start();
+        while (true)
+        {
+            Vector3Int ChunkPos = Vector3Int.FloorToInt(Player.transform.position / 16f);
+            ChunkPos.y = 0;
+            Vector3Int Pos = ChunkPos * 16;
+            //Check For Remesh
+            UnityEngine.Debug.Log("Loose Blocks: " + LooseBlocks.Count);
+            for (int i = 0; i < LooseBlocks.Count; i++)
             {
-                Vector3Int WPt = V * 16 + Pos;
-                GameObject tempChunk;
-                if (Chunks.TryGetValue(WPt, out tempChunk))
+                if (LooseBlocks[i] != null)
                 {
-                    if (tempChunk.GetComponent<ChunkObject>().RefreshRequired == ChunkObject.RemeshEnum.Face)
+                    if (LooseBlocks[i].GetComponent<LooseBlockScript>().ReadyForRemesh)
                     {
-                        tempChunk.GetComponent<ChunkObject>().Face();
-                        tempChunk.GetComponent<ChunkObject>().postMesh();
-                    }
-                    if (tempChunk.GetComponent<ChunkObject>().RefreshRequired == ChunkObject.RemeshEnum.Mesh)
-                    {
-                        tempChunk.GetComponent<ChunkObject>().Mesh();
-                        tempChunk.GetComponent<ChunkObject>().postMesh();
+                        LooseBlocks[i].GetComponent<LooseBlockScript>().MeldBlockIntoWorld();
+                        LooseBlocks.RemoveAt(i);
+                        i--;
                     }
                 }
                 else
                 {
-                    if (Deactivated.Count > 0)
-                    {
-                        GameObject GO = Deactivated.Pop();
-                        if (GO.activeSelf)
-                        {
-                        }
-                        else
-                        {
-                            GO.transform.position = WPt;
-                            Chunks.Add(WPt, GO);
-                            GO.GetComponent<ChunkObject>().asyncBuildChunk();
-                            GO.SetActive(true);
-                        }
-                    }
-                    else
-                    {
-                        GameObject GO = Instantiate(baseChunk, new Vector3(WPt.x, WPt.y, WPt.z), Quaternion.identity);
-                        Chunks.Add(WPt, GO);
-                        GO.GetComponent<ChunkObject>().asyncBuildChunk();
-                    }
+                    LooseBlocks.RemoveAt(i);
+                    i--;
                 }
-
-                CheckUrgentRefresh();
-                yield return null;
             }
-
-            yield return null;
+            //Remove unneeded chunks
             for (int i = 0; i < Chunks.Keys.Count; i++)
             {
                 Vector3Int WPt = (Chunks.ElementAt(i).Key - Pos);
                 WPt.x = WPt.x / 16;
                 WPt.y = WPt.y / 16;
                 WPt.z = WPt.z / 16;
-                if (!RenderList.Contains(WPt)) // Not visited last two times
+                if (!RenderList.Contains(WPt))
                 {
                     UnityEngine.Debug.Log("Remove: " + WPt);
                     GameObject tempChunk = Chunks.ElementAt(i).Value;
@@ -226,27 +214,113 @@ public class WorldScript : MonoBehaviour
                     Chunks.Remove(Chunks.ElementAt(i).Key);
                     i--;
                 }
-                CheckUrgentRefresh();
             }
 
-            Updating = false;
-        //}
+            foreach (Vector3Int V in RenderList)
+            {
+                Vector3Int WPt = V * 16 + Pos;
+                GameObject tempChunk;
+                // If chunk exists
+                if (Chunks.TryGetValue(WPt, out tempChunk))
+                {
+                    CheckIfUpdateRequired(tempChunk);
+                }
+                else // If it doesn't exist yet but should
+                {
+                    LoadNewChunk(WPt);
+                }
+                if (SW.ElapsedMilliseconds > 15)
+                {
+                    SW.Stop();
+                    yield return null;
+                    SW.Reset();
+                    SW.Start();
+                }
+            }
 
-        yield return null;
+            if (SW.ElapsedMilliseconds > 15)
+            {
+                SW.Stop();
+                yield return null;
+                SW.Reset();
+                SW.Start();
+            }
+        }
     }
+    private List<GameObject> PerformLooseBlock(Vector3Int CP)
+    {
+        List<GameObject> results = new List<GameObject>();
+        PhysicsEngine.FillRTNType R = PhysicsEngine.FillSearchBlocks(this, CP, 4);
+        List<GameObject> NewBlocks = new List<GameObject>();
+        for (int i = 0; i < R.Position.Count; i++)
+        {
+            CP = R.Position[i];
+            GameObject tempBlock = GetBlockMesh(CP); // Extract Block from Mesh
+            NewBlocks.Add(tempBlock);
+            tempBlock.GetComponent<Rigidbody>().Sleep();
+            BlockClass LastB = GetBlock(CP);
+            BlockClass NewB = new BlockClass(BlockClass.BlockType.Air);
+            NewB.Data.Blockiness = LastB.Data.Blockiness;
+            NewB.Data.Density = LastB.Data.Density;
+            NewB.Data.ControlPoint = LastB.Data.ControlPoint;
 
+            List<GameObject> r2 = SetBlock(CP, NewB);
+            foreach (GameObject GO in r2)
+            {
+                if (!results.Contains(GO))
+                {
+                    results.Add(GO);
+                }
+            }
+        }
+        //################################
+        // Need to now join each block with its neighbor.
+            
+        for(int i = 0; i < NewBlocks.Count; i++)
+        {
+            Vector3 Pos = NewBlocks[i].transform.position;
+            for(int i2 = 0; i2 < NewBlocks.Count; i2++)
+            {
+                if (i != i2)
+                {
+                    float Dis = (NewBlocks[i2].transform.position - NewBlocks[i].transform.position).sqrMagnitude;
+                    if(Dis <= 1)
+                    {
+                        Joint J = NewBlocks[i].AddComponent<FixedJoint>();
+                        J.breakForce = 500;
+                        J.breakTorque = 500;
+                        J.connectedBody = NewBlocks[i2].GetComponent<Rigidbody>();
+                    }
+                }
+            }
+
+        }
+        //Form Joints between NewBlocks and World
+        for (int i = 0; i < NewBlocks.Count; i++)
+        {
+            Vector3 Pos = NewBlocks[i].transform.position;
+            for(int i2 = 0; i2 < BlockProperties.DirectionVector.Length; i2++)
+            {
+                BlockClass B = GetBlock(Pos + BlockProperties.DirectionVector[i2]);
+                if (B.Data.isSolid)
+                {
+                    Joint J = NewBlocks[i].AddComponent<FixedJoint>();
+                    J.breakForce = 500;
+                    J.breakTorque = 500;
+                    J.connectedBody = GetChunkGameObject(Pos + BlockProperties.DirectionVector[i2]).GetComponent<Rigidbody>();
+                }
+            }
+        }
+            //################################
+        foreach (GameObject GO in NewBlocks)
+        {
+            GO.GetComponent<Rigidbody>().WakeUp();
+        }
+        return results;
+    }
     private void FixedUpdate()
     {
-        //Test if player has moved into a new chunk
-        Vector3Int Delta = Vector3Int.FloorToInt(LastPosition - Player.transform.position);
-        if (Mathf.Abs(Delta.x) > ChunkSize | Mathf.Abs(Delta.z) > ChunkSize)
-        {
-            Vector3Int Pos = Vector3Int.FloorToInt(Player.transform.position / 16f) * 16;
-            StartCoroutine("UpdateChunksVisible");
-            LastPosition = Pos;
-        }
-
-        ////////////////////////////
+       
         RaycastHit RH;
         Transform FPC = Player.transform.GetChild(0);
         if (FPC != null)
@@ -273,7 +347,7 @@ public class WorldScript : MonoBehaviour
                     BlockClass B = GetBlock(CP);
                     if (B.Data.Type != BlockClass.BlockType.Air)
                     {
-                        B.Data.Blockiness = (byte) Mathf.Clamp((float) B.Data.Blockiness + (MW * 160f),
+                        B.Data.Blockiness = (byte)Mathf.Clamp((float)B.Data.Blockiness + (MW * 160f),
                             byte.MinValue + 1,
                             byte.MaxValue); //MW steps by 0.1
                         List<GameObject> results = SetBlock(CP, B);
@@ -286,51 +360,41 @@ public class WorldScript : MonoBehaviour
                     }
                 }
                 else if (Input.GetMouseButton(0)) //Destroy Block
+                {
                     Target.transform.position = Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
+                    Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
+                    LooseBlockScript.InitBlockFromWorld(Target, this, CP);
+                    Target.GetComponent<MeshRenderer>().material = TargetMaterial1;
+                }
                 else if (Input.GetMouseButton(1)) // Build Block
+                {
                     Target.transform.position = Vector3Int.RoundToInt(RH.point + RH.normal * .5f);
+                    Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
+                    LooseBlockScript.InitBlockAsCube(Target);
+                    Target.GetComponent<MeshRenderer>().material = TargetMaterial2;
+                }
                 else
                 {
                     Target.transform.position = Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
+                    Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
+                    LooseBlockScript.InitBlockFromWorld(Target, this, CP);
+                    Target.GetComponent<MeshRenderer>().material = TargetMaterial1;
                 }
 
-                if (Input.GetMouseButtonUp(1))  // Set Block
+                if (Input.GetMouseButtonUp(1))  // Destroy Block
                 {
                     List<GameObject> results = new List<GameObject>();
                     Target.transform.position = Vector3Int.RoundToInt(RH.point + RH.normal * .5f);
                     Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
+                    results.AddRange(SetBlock(CP, new BlockClass(BlockClass.BlockType.Grass)));
 
-                    PhysicsEngine.FillRTNType R = PhysicsEngine.FillSearchBlocks(this, CP, 4);
-                    UnityEngine.Debug.Log("Fill Performed: ");
-                    UnityEngine.Debug.Log("Blocks Found: "+R.Blocks.Count+" : "+R.MaxDepthFound);
-                    for (int i = 0; i < R.Position.Count; i++)
-                    {
-                        CP = R.Position[i];
-                        //GameObject tempBlock = GetBlockMesh(CP); // Extract Block from Mesh
-                        BlockClass LastB = GetBlock(CP);
-                        BlockClass NewB = new BlockClass(BlockClass.BlockType.Water);
-                        NewB.Data.Blockiness = LastB.Data.Blockiness;
-                        NewB.Data.Density = LastB.Data.Density;
-                        NewB.Data.ControlPoint = LastB.Data.ControlPoint;
-                        
-                        //BlockClass B = R.Blocks[i];
-                        //B.Data.Type = BlockClass.BlockType.Water;
-                        List<GameObject> r2 = SetBlock(CP, NewB);
-                        foreach(GameObject GO in r2)
-                        {
-                            if (!results.Contains(GO))
-                            {
-                                results.Add(GO);
-                            }
-                        }
-                    }
-                    
                     foreach (GameObject GO in results)
                     {
                         //GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.MeshUrgent;
                         GO.GetComponent<ChunkObject>().Mesh();
                         GO.GetComponent<ChunkObject>().postMesh();
                     }
+                    
                 }
 
                 if (Input.GetMouseButtonUp(0))  // Destroy Block
@@ -343,24 +407,34 @@ public class WorldScript : MonoBehaviour
                     NewB.Data.Blockiness = LastB.Data.Blockiness;
                     NewB.Data.Density = LastB.Data.Density;
                     NewB.Data.ControlPoint = LastB.Data.ControlPoint;
-
+                    List<GameObject> results = new List<GameObject>();
                     if (tempBlock != null)
                     {
                         tempBlock.transform.Translate(RH.normal); //Pop up so it doesn't fall through the world
-                        List<GameObject> results = SetBlock(CP, NewB);
+                        results.AddRange(SetBlock(CP, NewB));
 
-                        PhysicsSeed = CP;
-                        foreach (GameObject GO in results)
+                        //PhysicsSeed = CP;
+
+                        //StartCoroutine(UpdateVoxelPhysics());
+                    }
+                    List<GameObject> R2 = PerformLooseBlock(CP);
+                    foreach (GameObject GO in results)
+                    {
+                        //GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.MeshUrgent;
+                        GO.GetComponent<ChunkObject>().Face();
+                        GO.GetComponent<ChunkObject>().postMesh();
+                        //GO.GetComponent<ChunkObject>().asyncReFaceChunk();
+                    }
+                    foreach (GameObject GO in R2)
+                    {
+                        if (!results.Contains(GO))
                         {
-                           // GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.MeshUrgent;
+                            //GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.MeshUrgent;
                             GO.GetComponent<ChunkObject>().Face();
                             GO.GetComponent<ChunkObject>().postMesh();
                             //GO.GetComponent<ChunkObject>().asyncReFaceChunk();
                         }
-                        StartCoroutine(UpdateVoxelPhysics());
                     }
-
-                    LooseBlocks.Add(tempBlock);
                 }
             }
             else
@@ -373,7 +447,16 @@ public class WorldScript : MonoBehaviour
             Target.SetActive(false);
         }
     }
-
+    public GameObject GetChunkGameObject(Vector3 Pnt)
+    {
+        Vector3Int ChunkPos = Vector3Int.FloorToInt(Pnt / 16f) * 16;
+        GameObject tempChunk;
+        if (Chunks.TryGetValue(ChunkPos, out tempChunk))
+        {
+            return tempChunk;
+        }
+        return null;
+    }
     public BlockClass GetBlock(Vector3 Pnt)
     {
         Vector3Int ChunkPos = Vector3Int.FloorToInt(Pnt / 16f) * 16;
@@ -388,7 +471,6 @@ public class WorldScript : MonoBehaviour
                 return tempChunk.GetComponent<ChunkObject>().Blocks[BlockPos.x + 1][BlockPos.y + 1][BlockPos.z + 1];
             }
         }
-
         return new BlockClass(BlockClass.BlockType.Air);
     }
 
@@ -402,6 +484,7 @@ public class WorldScript : MonoBehaviour
         {
             GameObject result = Instantiate(baseBlock, Pnt, Quaternion.identity);
             result.GetComponent<LooseBlockScript>().InitBlockFromWorld(this, Pnt);
+            LooseBlocks.Add(result);
             return result;
         }
 

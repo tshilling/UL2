@@ -9,40 +9,38 @@ public class PhysicsEngine {
     {
         public List<BlockClass> Blocks;
         public List<Vector3Int> Position;
-        public int MaxDepthFound;
+        public float MaxDistance;
     };
     private static int SearchCount = 0;
-    public static Vector3Int OriginalPos = new Vector3Int();
-    private static FillRTNType FillSearch(BlockClass CurrentBlock, WorldScript World, Vector3Int Position, int SearchIndex, int SearchDepth)
+    private static FillRTNType FillSearch(Vector3Int OriginalPos, WorldScript World, Vector3Int Position, int SearchIndex, int SearchDepth)
     {
+        BlockClass B = World.GetBlock(Position);
+
         FillRTNType Result = new FillRTNType();
         Result.Position = new List<Vector3Int>();
-        Result.Blocks = new List<BlockClass>();
-        Result.MaxDepthFound = SearchDepth;
-
-        CurrentBlock.SearchMarker = SearchIndex;
-        Result.Blocks.Add(CurrentBlock);
-        Result.Position.Add(Position);
+        if (B.Data.Type != BlockClass.BlockType.Air && B.Data.Type != BlockClass.BlockType.Water)
+        {
+            Result.Position.Add(Position);
+        }
         float Dis = (Position - OriginalPos).magnitude;
-        if (Dis > 4)
+        Result.MaxDistance = Dis;
+        if (Dis > SearchDepth)
             return Result;
-        //if (SearchDepth == 0)   //I have gone as far as I should;
-        //{
-        //    return Result;
-        //}
+
         for(int i = 0; i < BlockProperties.DirectionVector.Length; i++)
         {
-            BlockClass B = World.GetBlock(Position + BlockProperties.DirectionVector[i]);
+            B = World.GetBlock(Position + BlockProperties.DirectionVector[i]);
             if(B.Data.Type!= BlockClass.BlockType.Air && B.Data.Type != BlockClass.BlockType.Water)
             {
                 if(B.SearchMarker < SearchIndex)
                 {
-                    FillRTNType SubResult = FillSearch(B, World, Position + BlockProperties.DirectionVector[i], SearchIndex, SearchDepth - 1);
-                    Result.Blocks.AddRange(SubResult.Blocks);
+                    B.SearchMarker = SearchIndex;
+                    FillRTNType SubResult = FillSearch(OriginalPos, World, Position + BlockProperties.DirectionVector[i], SearchIndex, SearchDepth);
+                    //Result.Blocks.AddRange(SubResult.Blocks);
                     Result.Position.AddRange(SubResult.Position);
-                    if(SubResult.MaxDepthFound < Result.MaxDepthFound)
+                    if(SubResult.MaxDistance > Result.MaxDistance)
                     {
-                        Result.MaxDepthFound = SubResult.MaxDepthFound;
+                        Result.MaxDistance = SubResult.MaxDistance;
                     }
                 }
             }
@@ -54,13 +52,13 @@ public class PhysicsEngine {
         FillRTNType Result = new FillRTNType();
         Result.Position = new List<Vector3Int>();
         Result.Blocks = new List<BlockClass>();
-        Result.MaxDepthFound = SearchDepth;
+        Result.MaxDistance = 0;
         SearchCount++;
         BlockClass B = World.GetBlock(Position);
-        OriginalPos = Position;
         if (B != null)
         {
-            Result = FillSearch(B, World, Position, SearchCount, SearchDepth);
+            B.SearchMarker = SearchCount;
+            Result = FillSearch(Position, World, Position, SearchCount, SearchDepth);
         }
         return Result;
     }
