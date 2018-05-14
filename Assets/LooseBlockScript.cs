@@ -13,7 +13,16 @@ public class LooseBlockScript : MonoBehaviour {
     List<Vector3> CornersSource = new List<Vector3>();
     public LooseBlockScript()
     {
-        this.gameObject.AddComponent();
+        this.gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+        //this.gameObject.AddComponent();
+    }
+    void FixedUpdate()
+    {
+        if (!GetComponent<FixedJoint>())
+        {
+            GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+            //Destroy(this);
+        }
     }
     // Use this for initialization
     public static void InitBlockFromWorld(GameObject G, WorldScript world, Vector3 Pnt)
@@ -435,7 +444,7 @@ public class LooseBlockScript : MonoBehaviour {
     }
     void Update()
     {
-        if (GetComponent<Rigidbody>().velocity.sqrMagnitude < 0.001)  //Mesh not moving
+        if (GetComponent<Rigidbody>().velocity.sqrMagnitude < 0.01)  //Mesh not moving
         {
             if (!ReadyForRemesh)
             {

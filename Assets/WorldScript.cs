@@ -287,8 +287,8 @@ public class WorldScript : MonoBehaviour
                     if(Dis <= 1)
                     {
                         Joint J = NewBlocks[i].AddComponent<FixedJoint>();
-                        J.breakForce = 500;
-                        J.breakTorque = 500;
+                        J.breakForce = 300;
+                        J.breakTorque = 300;
                         J.connectedBody = NewBlocks[i2].GetComponent<Rigidbody>();
                     }
                 }
@@ -305,8 +305,8 @@ public class WorldScript : MonoBehaviour
                 if (B.Data.isSolid)
                 {
                     Joint J = NewBlocks[i].AddComponent<FixedJoint>();
-                    J.breakForce = 500;
-                    J.breakTorque = 500;
+                    J.breakForce = Mathf.Infinity;
+                    J.breakTorque = Mathf.Infinity;
                     J.connectedBody = GetChunkGameObject(Pos + BlockProperties.DirectionVector[i2]).GetComponent<Rigidbody>();
                 }
             }
