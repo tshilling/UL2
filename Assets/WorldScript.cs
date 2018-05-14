@@ -311,12 +311,166 @@ public class WorldScript : MonoBehaviour
                 }
             }
         }
+        for (int i = 0; i < NewBlocks.Count; i++)
+        {
+            NewBlocks[i].GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+        }
             //################################
-        foreach (GameObject GO in NewBlocks)
+            foreach (GameObject GO in NewBlocks)
         {
             GO.GetComponent<Rigidbody>().WakeUp();
         }
         return results;
+    }
+    private void InteractWithChunk(RaycastHit RH)
+    {
+        /*
+        float MW = Input.GetAxis("Mouse ScrollWheel");
+        if (MW != 0)
+        {
+            Target.transform.position = Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
+            Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
+            BlockClass B = GetBlock(CP);
+            if (B.Data.Type != BlockClass.BlockType.Air)
+            {
+                B.Data.Blockiness = (byte)Mathf.Clamp((float)B.Data.Blockiness + (MW * 160f),
+                    byte.MinValue + 1,
+                    byte.MaxValue); //MW steps by 0.1
+                List<GameObject> results = SetBlock(CP, B);
+                foreach (GameObject GO in results)
+                {
+                    GO.GetComponent<ChunkObject>().Face();//.Mesh();
+                    GO.GetComponent<ChunkObject>().postMesh();
+                    //GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.FaceUrgent;
+                }
+            }
+        }
+        else */
+        if (Input.GetMouseButton(0)) //Destroy Block
+        {
+            Target.transform.position = Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
+            Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
+            LooseBlockScript.InitBlockFromWorld(Target, this, CP);
+            Target.GetComponent<MeshRenderer>().material = TargetMaterial1;
+        }
+        else if (Input.GetMouseButton(1)) // Build Block
+        {
+            Target.transform.position = Vector3Int.RoundToInt(RH.point + RH.normal * .5f);
+            Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
+            LooseBlockScript.InitBlockAsCube(Target);
+            Target.GetComponent<MeshRenderer>().material = TargetMaterial2;
+        }
+        else
+        {
+            Target.transform.position = Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
+            Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
+            LooseBlockScript.InitBlockFromWorld(Target, this, CP);
+            Target.GetComponent<MeshRenderer>().material = TargetMaterial1;
+        }
+
+        if (Input.GetMouseButtonUp(1))  // Create Block
+        {
+            Target.transform.position = Vector3Int.RoundToInt(RH.point + RH.normal * .5f);
+            Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
+            GameObject temp = Instantiate(baseBlock, CP, Quaternion.identity);
+
+            LooseBlockScript.InitBlockAsCube(temp);
+            temp.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+            temp.transform.position = CP;
+            LooseBlocks.Add(temp);
+            Joint J = temp.AddComponent<FixedJoint>();
+            J.breakForce = 300;
+            J.breakTorque = 300;
+            J.connectedBody = RH.rigidbody;
+            /*
+            List<GameObject> results = new List<GameObject>();
+            Target.transform.position = Vector3Int.RoundToInt(RH.point + RH.normal * .5f);
+            Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
+            results.AddRange(SetBlock(CP, new BlockClass(BlockClass.BlockType.Grass)));
+
+            foreach (GameObject GO in results)
+            {
+                //GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.MeshUrgent;
+                GO.GetComponent<ChunkObject>().Mesh();
+                GO.GetComponent<ChunkObject>().postMesh();
+            }*/
+
+        }
+
+        if (Input.GetMouseButtonUp(0))  // Destroy Block
+        {
+            Target.transform.position = Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
+            Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
+            //GameObject tempBlock = GetBlockMesh(CP); // Extract Block from Mesh
+            BlockClass LastB = GetBlock(CP);
+            BlockClass NewB = new BlockClass(BlockClass.BlockType.Air);
+            NewB.Data.Blockiness = LastB.Data.Blockiness;
+            NewB.Data.Density = LastB.Data.Density;
+            NewB.Data.ControlPoint = LastB.Data.ControlPoint;
+            List<GameObject> results = new List<GameObject>();
+
+            List<GameObject> R2 = PerformLooseBlock(CP);
+            foreach (GameObject GO in results)
+            {
+                //GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.MeshUrgent;
+                GO.GetComponent<ChunkObject>().Face();
+                GO.GetComponent<ChunkObject>().postMesh();
+                //GO.GetComponent<ChunkObject>().asyncReFaceChunk();
+            }
+            foreach (GameObject GO in R2)
+            {
+                if (!results.Contains(GO))
+                {
+                    //GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.MeshUrgent;
+                    GO.GetComponent<ChunkObject>().Face();
+                    GO.GetComponent<ChunkObject>().postMesh();
+                    //GO.GetComponent<ChunkObject>().asyncReFaceChunk();
+                }
+            }
+        }
+    }
+    private void InteractWithLoose(RaycastHit RH)
+    {
+        GameObject GO = RH.rigidbody.gameObject;
+        if (Input.GetMouseButton(0)) //Destroy Block
+        {
+            Target.transform.SetPositionAndRotation(GO.transform.position, GO.transform.rotation);// Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
+            Target.GetComponent<MeshRenderer>().material = TargetMaterial1;
+            Target.GetComponent<MeshFilter>().mesh = GO.GetComponent<MeshFilter>().mesh;
+        }
+        else if (Input.GetMouseButton(1)) // Build Block
+        {
+            Target.transform.position = Vector3Int.RoundToInt(RH.point + RH.normal * .5f);
+            Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
+            LooseBlockScript.InitBlockAsCube(Target);
+            Target.GetComponent<MeshRenderer>().material = TargetMaterial2;
+        }
+        else
+        {
+            Target.transform.SetPositionAndRotation(GO.transform.position, GO.transform.rotation);// Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
+            Target.GetComponent<MeshRenderer>().material = TargetMaterial1;
+            Target.GetComponent<MeshFilter>().mesh = GO.GetComponent<MeshFilter>().mesh;
+        }
+        if (Input.GetMouseButtonUp(0))  // Destroy Block
+        {
+            Destroy(GO);
+        }
+        if (Input.GetMouseButtonUp(1))  // Set Block
+        {
+            Target.transform.position = Vector3Int.RoundToInt(RH.point + RH.normal * .5f);
+            Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
+            GameObject temp = Instantiate(baseBlock, CP, Quaternion.identity);
+           
+            LooseBlockScript.InitBlockAsCube(temp);
+            temp.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+            temp.transform.position = CP;
+            Joint J = temp.AddComponent<FixedJoint>();
+            J.breakForce = 300;
+            J.breakTorque = 300;
+            J.connectedBody = RH.rigidbody;
+
+
+        }
     }
     private void FixedUpdate()
     {
@@ -339,100 +493,18 @@ public class WorldScript : MonoBehaviour
             if (RH.distance < 10)
             {
                 Target.SetActive(true);
-                float MW = Input.GetAxis("Mouse ScrollWheel");
-                if (MW != 0)
+                // If it hit a chunk object, something meshed into the world
+                if (RH.rigidbody)
                 {
-                    Target.transform.position = Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
-                    Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
-                    BlockClass B = GetBlock(CP);
-                    if (B.Data.Type != BlockClass.BlockType.Air)
+                    if (RH.rigidbody.gameObject)
                     {
-                        B.Data.Blockiness = (byte)Mathf.Clamp((float)B.Data.Blockiness + (MW * 160f),
-                            byte.MinValue + 1,
-                            byte.MaxValue); //MW steps by 0.1
-                        List<GameObject> results = SetBlock(CP, B);
-                        foreach (GameObject GO in results)
+                        if (RH.rigidbody.gameObject.GetComponent<ChunkObject>())
                         {
-                            GO.GetComponent<ChunkObject>().Face();//.Mesh();
-                            GO.GetComponent<ChunkObject>().postMesh();
-                            //GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.FaceUrgent;
+                            InteractWithChunk(RH);
                         }
-                    }
-                }
-                else if (Input.GetMouseButton(0)) //Destroy Block
-                {
-                    Target.transform.position = Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
-                    Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
-                    LooseBlockScript.InitBlockFromWorld(Target, this, CP);
-                    Target.GetComponent<MeshRenderer>().material = TargetMaterial1;
-                }
-                else if (Input.GetMouseButton(1)) // Build Block
-                {
-                    Target.transform.position = Vector3Int.RoundToInt(RH.point + RH.normal * .5f);
-                    Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
-                    LooseBlockScript.InitBlockAsCube(Target);
-                    Target.GetComponent<MeshRenderer>().material = TargetMaterial2;
-                }
-                else
-                {
-                    Target.transform.position = Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
-                    Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
-                    LooseBlockScript.InitBlockFromWorld(Target, this, CP);
-                    Target.GetComponent<MeshRenderer>().material = TargetMaterial1;
-                }
-
-                if (Input.GetMouseButtonUp(1))  // Destroy Block
-                {
-                    List<GameObject> results = new List<GameObject>();
-                    Target.transform.position = Vector3Int.RoundToInt(RH.point + RH.normal * .5f);
-                    Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
-                    results.AddRange(SetBlock(CP, new BlockClass(BlockClass.BlockType.Grass)));
-
-                    foreach (GameObject GO in results)
-                    {
-                        //GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.MeshUrgent;
-                        GO.GetComponent<ChunkObject>().Mesh();
-                        GO.GetComponent<ChunkObject>().postMesh();
-                    }
-                    
-                }
-
-                if (Input.GetMouseButtonUp(0))  // Destroy Block
-                {
-                    Target.transform.position = Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
-                    Vector3Int CP = Vector3Int.FloorToInt(Target.transform.position);
-                    GameObject tempBlock = GetBlockMesh(CP); // Extract Block from Mesh
-                    BlockClass LastB = GetBlock(CP);
-                    BlockClass NewB = new BlockClass(BlockClass.BlockType.Air);
-                    NewB.Data.Blockiness = LastB.Data.Blockiness;
-                    NewB.Data.Density = LastB.Data.Density;
-                    NewB.Data.ControlPoint = LastB.Data.ControlPoint;
-                    List<GameObject> results = new List<GameObject>();
-                    if (tempBlock != null)
-                    {
-                        tempBlock.transform.Translate(RH.normal); //Pop up so it doesn't fall through the world
-                        results.AddRange(SetBlock(CP, NewB));
-
-                        //PhysicsSeed = CP;
-
-                        //StartCoroutine(UpdateVoxelPhysics());
-                    }
-                    List<GameObject> R2 = PerformLooseBlock(CP);
-                    foreach (GameObject GO in results)
-                    {
-                        //GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.MeshUrgent;
-                        GO.GetComponent<ChunkObject>().Face();
-                        GO.GetComponent<ChunkObject>().postMesh();
-                        //GO.GetComponent<ChunkObject>().asyncReFaceChunk();
-                    }
-                    foreach (GameObject GO in R2)
-                    {
-                        if (!results.Contains(GO))
+                        else// Hit a loose block
                         {
-                            //GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.MeshUrgent;
-                            GO.GetComponent<ChunkObject>().Face();
-                            GO.GetComponent<ChunkObject>().postMesh();
-                            //GO.GetComponent<ChunkObject>().asyncReFaceChunk();
+                            InteractWithLoose(RH);
                         }
                     }
                 }

@@ -13,7 +13,7 @@ public class LooseBlockScript : MonoBehaviour {
     List<Vector3> CornersSource = new List<Vector3>();
     public LooseBlockScript()
     {
-        this.gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+        //this.gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
         //this.gameObject.AddComponent();
     }
     void FixedUpdate()
@@ -27,6 +27,8 @@ public class LooseBlockScript : MonoBehaviour {
     // Use this for initialization
     public static void InitBlockFromWorld(GameObject G, WorldScript world, Vector3 Pnt)
     {
+        if(G.GetComponent<Rigidbody>())
+            G.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
         BlockClass Block;
         WorldScript World = world;
         List<Vector3> chunkVertices = new List<Vector3>();
@@ -165,6 +167,7 @@ public class LooseBlockScript : MonoBehaviour {
     }
     public void InitBlockFromWorld(WorldScript world, Vector3 Pnt)
     {
+        this.gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
         World = world;
 
         Vector3Int ChunkPos = Vector3Int.FloorToInt(Pnt / 16f) * 16;
