@@ -29,9 +29,9 @@ public class ChunkObject : MonoBehaviour
         set
         {
             _blocks = value;
-            //ReMeshRequired = true;
         }
     }
+    public ChunkObject[,,] Neighbors = new ChunkObject[3, 3, 3];
 
     #endregion
 
@@ -359,13 +359,13 @@ public class ChunkObject : MonoBehaviour
     private BlockClass.BlockData CalcCP(int X, int Y, int Z)
     {
         BlockClass.BlockData Result = Blocks[X][Y][Z].Data;
-        if (Result.CPLocked)
+        if (Result.CPLocked == true)
         {
             return Result;
         }
         Result.ControlPoint = new Vector3(0, 0, 0);
         byte EdgeCrossings = 0;
-        BlockClass.BlockData[] Adjacent =
+    BlockClass.BlockData[] Adjacent =
         {
             Blocks[X][Y][Z].Data,
             Blocks[X + 1][Y][Z].Data,
@@ -400,9 +400,7 @@ public class ChunkObject : MonoBehaviour
                     MaxB = Adjacent[i].Blockiness;
                 }
             }
-
-            Result.ControlPoint =
-                (Vector3.Lerp(Result.ControlPoint, new Vector3(0.5f, 0.5f, 0.5f), (float) (MaxB) / 255f));
+            Result.ControlPoint = (Vector3.Lerp(Result.ControlPoint, new Vector3(0.5f, 0.5f, 0.5f), ((float)MaxB) / 255f));
         }
         else
         {
@@ -436,15 +434,15 @@ public class ChunkObject : MonoBehaviour
 
         int sc = LandGeometry.Vertices.Count - 4; // squareCount << 2;//Multiply by 4
 
-        if (D1 > D2)
-        {
+        //if (D1 > D2)
+        //{
             LandGeometry.Triangles.Add(sc);
             LandGeometry.Triangles.Add(sc + 1);
             LandGeometry.Triangles.Add(sc + 3);
             LandGeometry.Triangles.Add(sc + 1);
             LandGeometry.Triangles.Add(sc + 2);
             LandGeometry.Triangles.Add(sc + 3);
-        }
+        /*}
         else
         {
             LandGeometry.Triangles.Add(sc);
@@ -454,7 +452,7 @@ public class ChunkObject : MonoBehaviour
             LandGeometry.Triangles.Add(sc + 2);
             LandGeometry.Triangles.Add(sc + 3);
 
-        }
+        }*/
         Vector2[] V = CB.GetTex();
 
         Vector2 uv = new Vector2(V[Dir].x / 16f, (15 - V[Dir].y) / 16f);

@@ -4,27 +4,22 @@ using UnityEngine;
 
 public class LooseBlockScript : MonoBehaviour {
 
+    public bool Meldable = true;
     BlockClass Block;
     WorldScript World;
     List<Vector3> chunkVertices = new List<Vector3>();
     List<int> chunkTriangles = new List<int>();
     List<Vector2> chunkUV = new List<Vector2>();
     List<Vector3> Corners = new List<Vector3>();
-    List<Vector3> CornersSource = new List<Vector3>();
+    //List<Vector3> CornersSource = new List<Vector3>();
     public LooseBlockScript()
     {
         //this.gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
         //this.gameObject.AddComponent();
     }
-    void FixedUpdate()
-    {
-        if (!GetComponent<FixedJoint>())
-        {
-            GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
-            //Destroy(this);
-        }
-    }
+
     // Use this for initialization
+    /*
     public static void InitBlockFromWorld(GameObject G, WorldScript world, Vector3 Pnt)
     {
         if(G.GetComponent<Rigidbody>())
@@ -114,21 +109,32 @@ public class LooseBlockScript : MonoBehaviour {
         List<int> chunkTriangles = new List<int>();
         List<Vector2> chunkUV = new List<Vector2>();
         List<Vector3> Corners = new List<Vector3>();
-        List<Vector3> CornersSource = new List<Vector3>();
+       // List<Vector3> CornersSource = new List<Vector3>();
 
         Block = new BlockClass(BlockClass.BlockType.Grass);
         chunkVertices.Clear();
         chunkTriangles.Clear();
         chunkUV.Clear();
         //####################################
+        Corners.Add(new Vector3(0.5f, 0.5f, 0.5f));
+        Corners.Add(new Vector3(-0.5f, 0.5f, 0.5f));
+        Corners.Add(new Vector3(0.5f, -0.5f, 0.5f));
+        Corners.Add(new Vector3(-0.5f, -0.5f, 0.5f));
+        Corners.Add(new Vector3(0.5f, 0.5f,-0.5f));
+        Corners.Add(new Vector3(-0.5f, 0.5f, -0.5f));
+        Corners.Add(new Vector3(0.5f, -0.5f, -0.5f));
+        Corners.Add(new Vector3(-0.5f, -0.5f, -0.5f));
         for (byte Dir = 0; Dir < 6; Dir++)
         {
             byte DirUV = Dir;
             for (int i = 0; i < 4; i++)
             {
-                Vector3 Pt = BlockProperties.FacePts[i];
-                Pt *= 0.5f;
-                chunkVertices.Add(BlockProperties.FacePts[BlockProperties.BlockFaces[Dir, i]] + new Vector3(0.5f,0.5f,0.5f));
+                //Vector3 Pt = BlockProperties.FacePts[i];
+                //Pt *= 0.5f;
+                //Corners.Add(BlockProperties.FacePts[BlockProperties.BlockFaces[Dir, i]] + new Vector3(0.5f, 0.5f, 0.5f));
+                Vector3 Pnt = BlockProperties.FacePts[BlockProperties.BlockFaces[Dir, i]] + new Vector3(0.5f, 0.5f, 0.5f);
+
+                chunkVertices.Add(Pnt);
             }
             Vector3 V1 = chunkVertices[chunkVertices.Count - 1] - chunkVertices[chunkVertices.Count - 2];
             Vector3 V2 = chunkVertices[chunkVertices.Count - 3] - chunkVertices[chunkVertices.Count - 2];
@@ -165,6 +171,7 @@ public class LooseBlockScript : MonoBehaviour {
         if (G.GetComponent<MeshCollider>())
             Rcol.sharedMesh = Rmesh;
     }
+    */
     public void InitBlockFromWorld(WorldScript world, Vector3 Pnt)
     {
         this.gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
@@ -183,8 +190,8 @@ public class LooseBlockScript : MonoBehaviour {
                 Block = CO.GetBlock(BlockPos);
                 for(int i = 0; i < 8; i++) { 
                     Corners.Add(CO.GetBlock(BlockPos + BlockProperties.FacePts[i]).Data.ControlPoint+ BlockProperties.FacePts[i]);
-                    CO.GetBlock(BlockPos + BlockProperties.FacePts[i]).Data.CPLocked = true;
-                    CornersSource.Add(BlockProperties.FacePts[i]+new Vector3(0.5f,0.5f,0.5f));
+                    //CO.GetBlock(BlockPos + BlockProperties.FacePts[i]).Data.CPLocked = true;
+                    //CornersSource.Add(BlockProperties.FacePts[i]+new Vector3(0.5f,0.5f,0.5f));
                 }
                 chunkVertices.Clear();
                 chunkTriangles.Clear();
@@ -237,7 +244,70 @@ public class LooseBlockScript : MonoBehaviour {
             }
         }
     }
+    public void InitBlockFromCube(WorldScript world)
+    {
+        World = world;
+        GameObject G = this.gameObject;
+        Block = new BlockClass(BlockClass.BlockType.Grass);
+        chunkVertices.Clear();
+        chunkTriangles.Clear();
+        chunkUV.Clear();
+        //####################################
+        Corners.Add(new Vector3(0.5f, 0.5f, 0.5f));
+        Corners.Add(new Vector3(-0.5f, 0.5f, 0.5f));
+        Corners.Add(new Vector3(0.5f, -0.5f, 0.5f));
+        Corners.Add(new Vector3(-0.5f, -0.5f, 0.5f));
+        Corners.Add(new Vector3(0.5f, 0.5f, -0.5f));
+        Corners.Add(new Vector3(-0.5f, 0.5f, -0.5f));
+        Corners.Add(new Vector3(0.5f, -0.5f, -0.5f));
+        Corners.Add(new Vector3(-0.5f, -0.5f, -0.5f));
+        for (byte Dir = 0; Dir < 6; Dir++)
+        {
+            byte DirUV = Dir;
+            for (int i = 0; i < 4; i++)
+            {
+                //Vector3 Pt = BlockProperties.FacePts[i];
+                //Pt *= 0.5f;
+                //Corners.Add(BlockProperties.FacePts[BlockProperties.BlockFaces[Dir, i]] + new Vector3(0.5f, 0.5f, 0.5f));
+                Vector3 Pnt = BlockProperties.FacePts[BlockProperties.BlockFaces[Dir, i]] + new Vector3(0.5f, 0.5f, 0.5f);
 
+                chunkVertices.Add(Pnt);
+            }
+            Vector3 V1 = chunkVertices[chunkVertices.Count - 1] - chunkVertices[chunkVertices.Count - 2];
+            Vector3 V2 = chunkVertices[chunkVertices.Count - 3] - chunkVertices[chunkVertices.Count - 2];
+            Vector3 N = Vector3.Cross(V1, V2).normalized;
+            if (N.y > .3)
+            {
+                DirUV = (byte)BlockClass.Direction.Up;
+            }
+            int sc = chunkVertices.Count - 4;
+            chunkTriangles.Add(sc);
+            chunkTriangles.Add(sc + 1);
+            chunkTriangles.Add(sc + 3);
+            chunkTriangles.Add(sc + 1);
+            chunkTriangles.Add(sc + 2);
+            chunkTriangles.Add(sc + 3);
+            Vector2[] UV = Block.GetTex();
+            Vector2 uv = new Vector2(UV[DirUV].x / 16f, (15 - UV[DirUV].y) / 16f);
+            chunkUV.Add(uv);
+            chunkUV.Add(new Vector2(uv.x + BlockProperties.TUnit, uv.y));
+            chunkUV.Add(new Vector2(uv.x + BlockProperties.TUnit, uv.y + BlockProperties.TUnit));
+            chunkUV.Add(new Vector2(uv.x, uv.y + BlockProperties.TUnit));
+        }
+        //####################################
+        // Generate Mesh
+        Mesh Rmesh;
+        MeshCollider Rcol;
+        Rmesh = G.GetComponent<MeshFilter>().mesh;
+        Rcol = G.GetComponent<MeshCollider>();
+        Rmesh.Clear();
+        Rmesh.vertices = chunkVertices.ToArray();
+        Rmesh.triangles = chunkTriangles.ToArray();
+        Rmesh.uv = chunkUV.ToArray();
+        Rmesh.RecalculateNormals();
+        if (G.GetComponent<MeshCollider>())
+            Rcol.sharedMesh = Rmesh;
+    }
     public Vector3[,,] OrderPoints()
     {
         UnityEngine.Debug.Log("Point Count: " + Corners.Count);
@@ -391,6 +461,8 @@ public class LooseBlockScript : MonoBehaviour {
 
         // Apply the blocks resulting transformation to each point of the original block
         Quaternion T = transform.rotation;
+        if (Corners.Count < 8)
+            return;
         for (int i = 0; i < Corners.Count; i++)
         {
             Corners[i] = T * Corners[i];
@@ -402,6 +474,8 @@ public class LooseBlockScript : MonoBehaviour {
             Vector3Int V = BlockProperties.FacePts[i];
             Vector3 NewPos = ChunkPos + BlockPos + V;
             BlockClass B = World.GetBlock(NewPos);
+            if (B == null)
+                B = new BlockClass(BlockClass.BlockType.Grass);
             if (i == 0)
                 B = Block;
             B.Data.ControlPoint = Results[V.x + 1, V.y + 1, V.z + 1] - V + Delta;
@@ -417,7 +491,7 @@ public class LooseBlockScript : MonoBehaviour {
             //GO2.GetComponent<ChunkObject>().Mesh();
             //GO2.GetComponent<ChunkObject>().postMesh();
         }
-        GameObject.Destroy(this.gameObject);
+        DestroyBlock();
     }
     // Update is called once per frame
     int stableCount = 0;
@@ -445,22 +519,38 @@ public class LooseBlockScript : MonoBehaviour {
         }
 
     }
-    void Update()
+    int delay = 300;
+
+    void FixedUpdate()
     {
-        if (GetComponent<Rigidbody>().velocity.sqrMagnitude < 0.01)  //Mesh not moving
+        if (Meldable)
         {
-            if (!ReadyForRemesh)
+            if (GetComponent<Rigidbody>().velocity.sqrMagnitude < 0.01)  //Mesh not moving
             {
-                stableCount++;
-                if (stableCount > 100)
+                GetComponent<Rigidbody>().Sleep();
+                if (!ReadyForRemesh)
                 {
-                    MarkForRefresh(this.gameObject);
+                    stableCount++;
+                    if (stableCount > 500)
+                    {
+                        MarkForRefresh(this.gameObject);
+                    }
                 }
             }
+            else
+            {
+                //GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+            }
+            if (GetComponent<Rigidbody>().velocity.sqrMagnitude > 500)  //Mesh moving away fast
+            {
+                DestroyBlock();
+            }
         }
-        if (GetComponent<Rigidbody>().velocity.sqrMagnitude > 500)  //Mesh moving away fast
-        {
-            GameObject.Destroy(this.gameObject);
-        }
+    }
+    public void DestroyBlock()
+    {
+        World.LooseBlocks.Remove(this.gameObject);
+        GameObject.Destroy(this.gameObject);
+
     }
 }

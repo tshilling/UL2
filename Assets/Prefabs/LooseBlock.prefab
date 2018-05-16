@@ -8,57 +8,57 @@ Prefab:
     m_TransformParent: {fileID: 0}
     m_Modifications: []
     m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 1217687397569800}
-  m_IsPrefabParent: 0
---- !u!1 &1217687397569800
+  m_SourcePrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 1370989969792966}
+  m_IsPrefabAsset: 1
+--- !u!1 &1370989969792966
 GameObject:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 5
+  serializedVersion: 6
   m_Component:
-  - component: {fileID: 4971842242292156}
-  - component: {fileID: 33159208676226020}
-  - component: {fileID: 64389782963878806}
-  - component: {fileID: 23386762622061600}
-  - component: {fileID: 114141161936148132}
+  - component: {fileID: 4327401893098404}
+  - component: {fileID: 33361013293668742}
+  - component: {fileID: 23668903624063762}
+  - component: {fileID: 64634356660715698}
+  - component: {fileID: 114836076576688144}
   m_Layer: 0
-  m_Name: Old
+  m_Name: LooseBlock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4971842242292156
+--- !u!4 &4327401893098404
 Transform:
   m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1217687397569800}
+  m_GameObject: {fileID: 1370989969792966}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 6.1925845, y: 31.713997, z: -16.184752}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &23386762622061600
+--- !u!23 &23668903624063762
 MeshRenderer:
   m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1217687397569800}
+  m_GameObject: {fileID: 1370989969792966}
   m_Enabled: 1
-  m_CastShadows: 0
+  m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
-  m_MotionVectors: 0
+  m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: cb7ac7de6b1ee874fa42e88d5599add5, type: 2}
+  - {fileID: 2100000, guid: fef5c933c90f5884bbec9bee56a5d9dc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -78,19 +78,19 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!33 &33159208676226020
+--- !u!33 &33361013293668742
 MeshFilter:
   m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1217687397569800}
-  m_Mesh: {fileID: 0}
---- !u!64 &64389782963878806
+  m_GameObject: {fileID: 1370989969792966}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!64 &64634356660715698
 MeshCollider:
   m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1217687397569800}
+  m_GameObject: {fileID: 1370989969792966}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
@@ -98,24 +98,16 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 14
   m_SkinWidth: 0.01
-  m_Mesh: {fileID: 0}
---- !u!114 &114141161936148132
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &114836076576688144
 MonoBehaviour:
   m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1217687397569800}
+  m_GameObject: {fileID: 1370989969792966}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d06cf28adb06e04eb350dde0ff9be4e, type: 3}
+  m_Script: {fileID: 11500000, guid: a9e6d6b62dd2d0845b381095d59228f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseBlock: {fileID: 0}
-  ready: 0
-  UpdateCount: 0
-  Water: {fileID: 0}
-  mesh: {fileID: 0}
-  col: {fileID: 0}
-  waterMesh: {fileID: 0}
-  waterCol: {fileID: 0}
-  reMeshRequired: 0
+  ReadyForRemesh: 0

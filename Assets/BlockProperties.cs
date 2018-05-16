@@ -66,4 +66,21 @@ public class BlockProperties
         new Vector3Int(0, 0, -1), //South
         new Vector3Int(0, -1, 0) // Down
     };
+
+    public struct PositionStruct
+    {
+        public Vector3 RawInWorld;
+        public Vector3Int BlockInWorld;
+        public Vector3Int ChunkInWorld;
+        public Vector3Int BlockInChunk;
+    }
+    public static PositionStruct GetPosition(Vector3 Input)
+    {
+        PositionStruct Result = new PositionStruct();
+        Result.RawInWorld = Input;
+        Result.BlockInWorld = Vector3Int.FloorToInt(Input);
+        Result.ChunkInWorld = Vector3Int.FloorToInt(Input / 16f) * 16;
+        Result.BlockInChunk = Result.BlockInWorld - Result.ChunkInWorld;
+        return Result;
+    }
 }

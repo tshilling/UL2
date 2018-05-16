@@ -1,0 +1,2 @@
+1.) In WorldScript.cs, LoadNewChunks.  If the reusable chunks, stored in Deactivated are used, they occasionally result in wierdness or missing colliders.  
+	If I comment out their use and just force a new initialization, problem goes away.  Are we really getting a benefit from the more complicated system?

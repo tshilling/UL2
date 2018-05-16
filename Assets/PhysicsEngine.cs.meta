@@ -3,7 +3,10 @@ guid: 338b4725bdf49ee4a81965d8bc5871a7
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - PhysicsPrefab: {fileID: 1286390085248844, guid: af10ebcbd4e51db418ec33b57e9d941a,
+      type: 2}
+  - World: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
