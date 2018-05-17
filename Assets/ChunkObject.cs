@@ -236,21 +236,25 @@ public class ChunkObject : MonoBehaviour
         {
             var V = new Vector3Int(X, Y, Z);
             if (GetBlock(V).Data.Type == BlockClass.BlockType.Water)
+            {
                 for (byte Dir = 0; Dir < 6; Dir++)
+                {
                     if (GetBlock(V + BlockProperties.DirectionVector[Dir]).Data.Type == BlockClass.BlockType.Air)
                         AddFaceWater(Dir, V);
+                }
+            }
             else
+            {
                 for (byte Dir = 0; Dir < 6; Dir++)
                 {
                     var B0 = (byte) (GetBlock(V).Data.Occlude & (1 << Dir));
-                    if (B0 > 0)
-                    {
-                        var B1 = (byte) (GetBlock(V + BlockProperties.DirectionVector[Dir]).Data.Occlude &
-                                         (1 << (5 - Dir)));
-                        if (B1 == 0)
-                            AddFace(Dir, V);
-                    }
+                    if (B0 <= 0) continue;
+                    var B1 = (byte) (GetBlock(V + BlockProperties.DirectionVector[Dir]).Data.Occlude &
+                                     (1 << (5 - Dir)));
+                    if (B1 == 0)
+                        AddFace(Dir, V);
                 }
+            }
         }
     }
 
