@@ -534,7 +534,7 @@ public class LooseBlockScript : MonoBehaviour
                 if (!ReadyForRemesh)
                 {
                     stableCount++;
-                    if (stableCount > 500) MarkForRefresh(gameObject);
+                    if (stableCount > 50) MarkForRefresh(gameObject);
                 }
             }
 

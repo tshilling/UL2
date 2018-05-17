@@ -18,7 +18,7 @@ public class WorldScript : MonoBehaviour
     private Dictionary<ChunkObject, bool> chunksBuilding;
     private readonly Stack<GameObject> Deactivated = new Stack<GameObject>();
     private Vector3Int LastPosition = new Vector3Int(0, 0, 0);
-    private int LoadCount;
+    private int _loadCount;
     public Slider loadingSlider;
     public List<GameObject> LooseBlocks = new List<GameObject>();
     private PhysicsEngine MyPhysics;
@@ -103,7 +103,7 @@ public class WorldScript : MonoBehaviour
         }
 
         WatchdogTimer.Start();
-        while (LoadCount < RenderList.Count)
+        while (_loadCount < RenderList.Count)
         {
             Debug.Log("Waiting");
             if (WatchdogTimer.ElapsedMilliseconds > 3000) break;
@@ -113,6 +113,7 @@ public class WorldScript : MonoBehaviour
 
         Debug.Log("Done Loading");
         loadingSlider.gameObject.SetActive(false);
+        
         Player.GetComponent<FirstPersonController>().UnFreeze();
         StartCoroutine(UpdateWorld());
         yield return null;
@@ -120,14 +121,14 @@ public class WorldScript : MonoBehaviour
 
     private void OnChunkBuilt(ChunkObject chunk)
     {
-        LoadCount++;
+        _loadCount++;
         WatchdogTimer.Reset();
         WatchdogTimer.Start();
     }
 
     private void Update()
     {
-        loadingSlider.value = LoadCount / (float) (RenderList.Count - 1) / .9f;
+        loadingSlider.value = _loadCount / (float) (RenderList.Count - 1) / .9f;
     }
 
     private void CheckIfUpdateRequired(GameObject GO)
@@ -287,6 +288,7 @@ public class WorldScript : MonoBehaviour
                     GO.GetComponent<ChunkObject>().postMesh();
                 }
 
+                UnityEngine.Debug.Log("In Here");
                 MyPhysics.PhysicsPrefab = PhysicsPrefab;
                 MyPhysics.RefreshModel(Target.transform.position);
             }
