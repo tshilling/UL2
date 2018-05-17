@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="BlockClass">
+    <Position X="12.5" Y="0.5" Width="1.5" />
+    <NestedTypes>
+      <Enum Name="BlockClass.Direction" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\BlockClass.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="BlockClass.BlockType" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\BlockClass.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Struct Name="BlockClass.BlockData" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\BlockClass.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAEAAAAAAAAAACBAAAAABAAIAIAAAAAAAA=</HashCode>
+      <FileName>Assets\BlockClass.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BlockProperties">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <NestedTypes>
+      <Struct Name="BlockProperties.PositionStruct" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\BlockProperties.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAACAAACCAAAAAAAAAAAIAQAIAAABAAAAAACAASAAA=</HashCode>
+      <FileName>Assets\BlockProperties.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ChunkObject">
+    <Position X="16" Y="0.5" Width="3" />
+    <NestedTypes>
+      <Delegate Name="ChunkObject.OnChunkBuilt" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\ChunkObject.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Enum Name="ChunkObject.RemeshEnum" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\ChunkObject.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>BAAEAgAAMAAACgEkBGACJgQBAAAwAQAAIYhAJAAAAEQ=</HashCode>
+      <FileName>Assets\ChunkObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FixJoint">
+    <Position X="7.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\FixJoint.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GeometryData">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAABAAAAAAAAAAAAAAAAEIAAAABAAAA=</HashCode>
+      <FileName>Assets\GeometryData.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LoadScreen">
+    <Position X="8.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAEAAAAAAAAACAAIAAAAAAAQAAAAgAAAAAA=</HashCode>
+      <FileName>Assets\LoadScreen.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LooseBlockScript">
+    <Position X="3.75" Y="0.5" Width="1.5" />
+    <NestedTypes>
+      <Enum Name="LooseBlockScript.sortDimension" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\LooseBlockScript.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="LooseBlockScript.minMax" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\LooseBlockScript.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAQUEAAAAlAAAAAAQBBAAUgAAQAIAAAAIAIAAAAAAAA=</HashCode>
+      <FileName>Assets\LooseBlockScript.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PhysicsEngine">
+    <Position X="5.5" Y="0.5" Width="1.5" />
+    <NestedTypes>
+      <Struct Name="PhysicsEngine.SearchResults" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\PhysicsEngine.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+      <Struct Name="PhysicsEngine.FillRTNType" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\PhysicsEngine.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>ABAAgBAQABAAAEAAAAAAAAIAAAAgAAAAAAAAMIAAAAA=</HashCode>
+      <FileName>Assets\PhysicsEngine.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PhysicsObject">
+    <Position X="14.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAgAAAAEA=</HashCode>
+      <FileName>Assets\PhysicsObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UnderWater">
+    <Position X="7.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAACBAAAAAQECAAAAAABBAAAQAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\UnderWater.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WorldScript">
+    <Position X="10.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAFAQQ6A4gAEAEAABPCCIAAaQCAAAIABBAUCBAEQ=</HashCode>
+      <FileName>Assets\WorldScript.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

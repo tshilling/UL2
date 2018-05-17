@@ -1,29 +1,31 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class UnderWater : MonoBehaviour {
-    //Define variable
-    public float underwaterLevel = 26.2f;
-
+public class UnderWater : MonoBehaviour
+{
     //The scene's default fog settings
     private bool defaultFog;
     private Color defaultFogColor;
     private float defaultFogDensity;
     private Material defaultSkybox;
     private Material noSkybox;
-    // Use this for initialization
-    void Start () {
-        GetComponent<Camera>().backgroundColor = new Color(0, 0.3f, 0.5f, 1);
-        defaultFog = RenderSettings.fog;
-    defaultFogColor = RenderSettings.fogColor;
-    defaultFogDensity = RenderSettings.fogDensity;
-    defaultSkybox = RenderSettings.skybox;
-}
 
     // Update is called once per frame
     public bool Under = false;
-    void Update()
+
+    //Define variable
+    public float underwaterLevel = 26.2f;
+
+    // Use this for initialization
+    private void Start()
+    {
+        GetComponent<Camera>().backgroundColor = new Color(0, 0.3f, 0.5f, 1);
+        defaultFog = RenderSettings.fog;
+        defaultFogColor = RenderSettings.fogColor;
+        defaultFogDensity = RenderSettings.fogDensity;
+        defaultSkybox = RenderSettings.skybox;
+    }
+
+    private void Update()
     {
         if (Under)
         {
@@ -40,5 +42,4 @@ public class UnderWater : MonoBehaviour {
             RenderSettings.skybox = defaultSkybox;
         }
     }
-
 }

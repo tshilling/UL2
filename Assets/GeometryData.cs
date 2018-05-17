@@ -3,6 +3,12 @@ using UnityEngine;
 
 public class GeometryData
 {
+    public List<Vector3> Normals;
+    public List<int> Triangles;
+    public List<Vector2> UV;
+
+    public List<Vector3> Vertices;
+
     public GeometryData()
     {
         Vertices = new List<Vector3>();
@@ -18,9 +24,4 @@ public class GeometryData
         Triangles.Clear();
         UV.Clear();
     }
-
-    public List<Vector3> Vertices;
-    public List<Vector3> Normals;
-    public List<int> Triangles;
-    public List<Vector2> UV;
 }

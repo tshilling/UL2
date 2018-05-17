@@ -1,9 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class FixJoint : MonoBehaviour {
-    void FixedUpdate()
+public class FixJoint : MonoBehaviour
+{
+    private void FixedUpdate()
     {
         if (!GetComponent<FixedJoint>())
         {
