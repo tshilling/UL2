@@ -64,6 +64,15 @@ Prefab:
       propertyPath: m_ReceiveShadows
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: BaseBlock
+      value: 
+      objectReference: {fileID: 1887791439374962, guid: 6f761e4f7cfaebb4f84b14b390d560de,
+        type: 2}
+    - target: {fileID: 0}
+      propertyPath: Water
+      value: 
+      objectReference: {fileID: 1121531270686624}
     m_RemovedComponents:
     - {fileID: 0}
   m_SourcePrefab: {fileID: 0}
@@ -272,10 +281,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d06cf28adb06e04eb350dde0ff9be4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BaseBlock: {fileID: 0}
-  Water: {fileID: 0}
+  RefreshRequired: 0
+  BaseBlock: {fileID: 1887791439374962, guid: 6f761e4f7cfaebb4f84b14b390d560de, type: 2}
+  Water: {fileID: 1121531270686624}
   LandMeshData: {fileID: 0}
   LandMeshCollider: {fileID: 0}
   WaterMeshData: {fileID: 0}
   WaterCollider: {fileID: 0}
-  RefreshRequired: 0

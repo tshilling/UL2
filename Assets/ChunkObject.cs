@@ -187,20 +187,31 @@ public class ChunkObject : MonoBehaviour
 
     public async void asyncBuildChunk()
     {
-        myNoise.SetSeed(1234);
-        preSeed();
-        Task T1 = Task.Run(() => { Seed(); });
-        await T1;
-        if(T1.Exception !=null)
-            UnityEngine.Debug.Log("Task 1: "+ T1.Exception);
-        postSeed();
-        preMesh();
-        Task T2 = Task.Run(() => { Mesh(); });
-        await T2;
-        if (T2.Exception != null)
-            UnityEngine.Debug.Log("Task 1: " + T1.Exception);
-        postMesh();
-        ChunkBuilt?.Invoke(this);
+        try
+        {
+            myNoise.SetSeed(1234);
+            preSeed();
+            Task T1 = Task.Run(() => { Seed(); });
+            
+            if (T1.Exception != null)
+                UnityEngine.Debug.Log("Task 1: " + T1.Exception);
+            if (T1.IsCanceled)
+                UnityEngine.Debug.Log("Task 1 Cancelled");
+            postSeed();
+            preMesh();
+            Task T2 = Task.Run(() => { Mesh(); });
+            await T2;
+            if (T2.Exception != null)
+                UnityEngine.Debug.Log("Task 1: " + T1.Exception);
+            if (T1.IsCanceled)
+                UnityEngine.Debug.Log("Task 2 Cancelled");
+            postMesh();
+            ChunkBuilt?.Invoke(this);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.Log("Error: " + e.InnerException);
+        }
     }
 
     public async void asyncReMeshChunk()
