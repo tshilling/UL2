@@ -32,7 +32,9 @@ public class ChunkObject : MonoBehaviour
         {
             Blocks[x] = new BlockClass[BlockProperties.ChunkSizeP2][];
             for (var y = 0; y < BlockProperties.ChunkSizeP2; y++)
+            {
                 Blocks[x][y] = new BlockClass[BlockProperties.ChunkSizeP2];
+            }
         }
     }
 
@@ -140,29 +142,29 @@ public class ChunkObject : MonoBehaviour
             //Set Altitude
             for (var Y = 0; Y < BlockProperties.ChunkSizeP2; Y++)
             {
-                var B = new BlockClass(BlockClass.BlockType.Grass);
                 var WPt = Position + new Vector3(X, Y, Z);
+                var B = new BlockClass(BlockClass.BlockType.Grass, WPt);
                 if (WPt.y == 0)
                 {
-                    B = new BlockClass(BlockClass.BlockType.BedRock);
+                    B = new BlockClass(BlockClass.BlockType.BedRock, WPt);
                 }
                 else
                 {
                     var i = LP * 32f + SP * 16f; // Number 0 to 128
                     i = i + BlockProperties.chunkDistance.y * 8 - WPt.y;
                     if (i < 0)
-                        B = new BlockClass(BlockClass.BlockType.Air);
-                    else if (i > 1) B = new BlockClass(BlockClass.BlockType.Dirt);
+                        B = new BlockClass(BlockClass.BlockType.Air, WPt);
+                    else if (i > 1) B = new BlockClass(BlockClass.BlockType.Dirt, WPt);
 
                     B.Data.Density =
                         (sbyte) Mathf.Clamp(i * sbyte.MaxValue, sbyte.MinValue, sbyte.MaxValue);
-                    if (OutCroppingsPeriod[index3++] > .4f) B = new BlockClass(BlockClass.BlockType.BedRock);
+                    if (OutCroppingsPeriod[index3++] > .4f) B = new BlockClass(BlockClass.BlockType.BedRock, WPt);
 
-                    if (CavePeriod[index2++] > .3f) B = new BlockClass(BlockClass.BlockType.Air);
+                    if (CavePeriod[index2++] > .3f) B = new BlockClass(BlockClass.BlockType.Air, WPt);
 
                     if ((WPt.y < 30) & (B.Data.Type == BlockClass.BlockType.Air))
                     {
-                        B = new BlockClass(BlockClass.BlockType.Water);
+                        B = new BlockClass(BlockClass.BlockType.Water, WPt);
                         B.Data.Density = (sbyte) Mathf.Clamp(i * sbyte.MaxValue, sbyte.MinValue,
                             sbyte.MaxValue);
                     }
@@ -187,12 +189,17 @@ public class ChunkObject : MonoBehaviour
     {
         myNoise.SetSeed(1234);
         preSeed();
-        await Task.Run(() => { Seed(); });
+        Task T1 = Task.Run(() => { Seed(); });
+        await T1;
+        if(T1.Exception !=null)
+            UnityEngine.Debug.Log("Task 1: "+ T1.Exception);
         postSeed();
         preMesh();
-        await Task.Run(() => { Mesh(); });
+        Task T2 = Task.Run(() => { Mesh(); });
+        await T2;
+        if (T2.Exception != null)
+            UnityEngine.Debug.Log("Task 1: " + T1.Exception);
         postMesh();
-
         ChunkBuilt?.Invoke(this);
     }
 
@@ -240,7 +247,7 @@ public class ChunkObject : MonoBehaviour
                 for (byte Dir = 0; Dir < 6; Dir++)
                 {
                     if (GetBlock(V + BlockProperties.DirectionVector[Dir]).Data.Type == BlockClass.BlockType.Air)
-                        AddFaceWater(Dir, V);
+                        AddFaceWater(WaterGeometry, Dir, V);
                 }
             }
             else
@@ -252,7 +259,7 @@ public class ChunkObject : MonoBehaviour
                     var B1 = (byte) (GetBlock(V + BlockProperties.DirectionVector[Dir]).Data.Occlude &
                                      (1 << (5 - Dir)));
                     if (B1 == 0)
-                        AddFace(Dir, V);
+                        AddFace(LandGeometry, Dir, V);
                 }
             }
         }
@@ -285,7 +292,7 @@ public class ChunkObject : MonoBehaviour
     private BlockClass.BlockData CalcCP(int X, int Y, int Z)
     {
         var Result = Blocks[X][Y][Z].Data;
-        if (Result.CPLocked) return Result;
+        if (Result.CpLocked) return Result;
         Result.ControlPoint = new Vector3(0, 0, 0);
         byte EdgeCrossings = 0;
         BlockClass.BlockData[] Adjacent =
@@ -332,61 +339,46 @@ public class ChunkObject : MonoBehaviour
         return Result;
     }
 
-    private void AddFace(byte Dir, Vector3Int Center)
+    private void AddFace(GeometryData Geo, byte Dir, Vector3Int Center)
     {
         var CB = GetBlock(Center); // Blocks[Center.x+1,Center.y+1,Center.z+1];
         for (var i = 0; i < 4; i++)
         {
             var Blk = Center + BlockProperties.FacePts[BlockProperties.BlockFaces[Dir, i]];
-            LandGeometry.Vertices.Add(Blk + Blocks[Blk.x + 1][Blk.y + 1][Blk.z + 1].Data.ControlPoint);
-            LandGeometry.Normals.Add(BlockProperties.DirectionVector[Dir]);
+            Geo.Vertices.Add(Blk + Blocks[Blk.x + 1][Blk.y + 1][Blk.z + 1].Data.ControlPoint);
+            Geo.Normals.Add(BlockProperties.DirectionVector[Dir]);
         }
 
-        var V1 = LandGeometry.Vertices[LandGeometry.Vertices.Count - 1] -
-                 LandGeometry.Vertices[LandGeometry.Vertices.Count - 2];
-        var V2 = LandGeometry.Vertices[LandGeometry.Vertices.Count - 3] -
-                 LandGeometry.Vertices[LandGeometry.Vertices.Count - 2];
-        var C1 = (LandGeometry.Vertices[LandGeometry.Vertices.Count - 1] +
-                  LandGeometry.Vertices[LandGeometry.Vertices.Count - 3]) / 2f;
-        var C2 = (LandGeometry.Vertices[LandGeometry.Vertices.Count - 2] +
-                  LandGeometry.Vertices[LandGeometry.Vertices.Count - 4]) / 2f;
-        var D1 = (C1 - Center).sqrMagnitude;
-        var D2 = (C2 - Center).sqrMagnitude;
+        var V1 = Geo.Vertices[Geo.Vertices.Count - 1] -
+                 Geo.Vertices[Geo.Vertices.Count - 2];
+        var V2 = Geo.Vertices[Geo.Vertices.Count - 3] -
+                 Geo.Vertices[Geo.Vertices.Count - 2];
+
         var N = Vector3.Cross(V1, V2).normalized;
         if (N.y > .3) Dir = (byte) BlockClass.Direction.Up; //Up
 
-        var sc = LandGeometry.Vertices.Count - 4; // squareCount << 2;//Multiply by 4
+        var sc = Geo.Vertices.Count - 4; // squareCount << 2;//Multiply by 4
 
-        //if (D1 > D2)
-        //{
-        LandGeometry.Triangles.Add(sc);
-        LandGeometry.Triangles.Add(sc + 1);
-        LandGeometry.Triangles.Add(sc + 3);
-        LandGeometry.Triangles.Add(sc + 1);
-        LandGeometry.Triangles.Add(sc + 2);
-        LandGeometry.Triangles.Add(sc + 3);
-        /*}
-        else
-        {
-            LandGeometry.Triangles.Add(sc);
-            LandGeometry.Triangles.Add(sc + 1);
-            LandGeometry.Triangles.Add(sc + 2);
-            LandGeometry.Triangles.Add(sc);
-            LandGeometry.Triangles.Add(sc + 2);
-            LandGeometry.Triangles.Add(sc + 3);
+        Geo.Triangles.Add(sc);
+        Geo.Triangles.Add(sc + 1);
+        Geo.Triangles.Add(sc + 3);
+        Geo.Triangles.Add(sc + 1);
+        Geo.Triangles.Add(sc + 2);
+        Geo.Triangles.Add(sc + 3);
 
-        }*/
+
+        
         var V = CB.GetTex();
 
         var uv = new Vector2(V[Dir].x / 16f, (15 - V[Dir].y) / 16f);
-        LandGeometry.UV.Add(uv);
-        LandGeometry.UV.Add(new Vector2(uv.x + BlockProperties.TUnit, uv.y));
-        LandGeometry.UV.Add(new Vector2(uv.x + BlockProperties.TUnit, uv.y + BlockProperties.TUnit));
-        LandGeometry.UV.Add(new Vector2(uv.x, uv.y + BlockProperties.TUnit));
+        Geo.UV.Add(uv);
+        Geo.UV.Add(new Vector2(uv.x + BlockProperties.TUnit, uv.y));
+        Geo.UV.Add(new Vector2(uv.x + BlockProperties.TUnit, uv.y + BlockProperties.TUnit));
+        Geo.UV.Add(new Vector2(uv.x, uv.y + BlockProperties.TUnit));
         //squareCount++;
     }
 
-    private void AddFaceWater(byte Dir, Vector3Int Center)
+    private void AddFaceWater(GeometryData Geo, byte Dir, Vector3Int Center)
     {
         var CB = GetBlock(Center); // Blocks[Center.x+1,Center.y+1,Center.z+1];
         for (var i = 0; i < 4; i++)
@@ -396,24 +388,24 @@ public class ChunkObject : MonoBehaviour
             var CP = Blocks[Blk.x + 1][Blk.y + 1][Blk.z + 1].Data.ControlPoint;
             //if(Dir== 0)
             //CP.y = 0f;
-            WaterGeometry.Vertices.Add(Blk + CP);
+            Geo.Vertices.Add(Blk + CP);
             LandGeometry.Normals.Add(BlockProperties.DirectionVector[Dir]);
         }
 
-        var sc = WaterGeometry.Vertices.Count - 4; // squareCount << 2;//Multiply by 4
-        WaterGeometry.Triangles.Add(sc);
-        WaterGeometry.Triangles.Add(sc + 1);
-        WaterGeometry.Triangles.Add(sc + 3);
-        WaterGeometry.Triangles.Add(sc + 1);
-        WaterGeometry.Triangles.Add(sc + 2);
-        WaterGeometry.Triangles.Add(sc + 3);
+        var sc = Geo.Vertices.Count - 4; // squareCount << 2;//Multiply by 4
+        Geo.Triangles.Add(sc);
+        Geo.Triangles.Add(sc + 1);
+        Geo.Triangles.Add(sc + 3);
+        Geo.Triangles.Add(sc + 1);
+        Geo.Triangles.Add(sc + 2);
+        Geo.Triangles.Add(sc + 3);
         var V = CB.GetTex();
 
         var uv = new Vector2(0, 0);
-        WaterGeometry.UV.Add(uv);
-        WaterGeometry.UV.Add(new Vector2(1, 0));
-        WaterGeometry.UV.Add(new Vector2(1, 1));
-        WaterGeometry.UV.Add(new Vector2(0, 1));
+        Geo.UV.Add(uv);
+        Geo.UV.Add(new Vector2(1, 0));
+        Geo.UV.Add(new Vector2(1, 1));
+        Geo.UV.Add(new Vector2(0, 1));
         //squareCount++;
     }
 

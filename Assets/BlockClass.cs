@@ -24,6 +24,7 @@ public class BlockClass
         Down = 5
     }
 
+    public Vector3Int Position = new Vector3Int();
     // Provides BlockType information for each face of a six-sided cube, but what do the Y component of Vector2 represent?
     public static Vector2[][] Texture =
     {
@@ -53,37 +54,48 @@ public class BlockClass
             new Vector2(14, 12)
         } //Air
     };
-
     public static byte[] Blockiness = {0, 255, 255, 255, 1};
     public static sbyte[] Density = {-126, 127, 127, 127, -127};
     public static byte[] Occlude = {0, 63, 63, 63, 0};
-
+    private static byte[] _strength = {10, 10, 10, 10, 10};
     public BlockData Data;
     public int SearchMarker = 0; // Used for Physics Engine
 
     public BlockClass()
     {
-        Data.CPLocked = false;
+        Position = new Vector3Int(0,0,0);
         Data.Type = BlockType.Air;
-        Data.isSolid = false;
-        //[NOTE]: Static casting the Data.Type enumeration to byte limits you to 255 possible types and will fail silently.
-        Data.Density = Density[(int) Data.Type];
-        Data.Blockiness = Blockiness[(int) Data.Type];
-        Data.Occlude = Occlude[(int) Data.Type];
+        Data.IsSolid = false;
+        InitBlock();
+    }
+    public BlockClass(BlockType type, Vector3 pos)
+    {
+        Position = Vector3Int.FloorToInt(pos);
+        Data.Type = type;
+        InitBlock();
+    }
+    public BlockClass(BlockType type, Vector3Int pos)
+    {
+        Position = pos;
+        Data.Type = type;
+        InitBlock();
+    }
+    private void InitBlock()
+    {
+        Data.CpLocked = false;
+        Data.Density = Density[(int)Data.Type];
+        Data.Blockiness = Blockiness[(int)Data.Type];
+        Data.Occlude = Occlude[(int)Data.Type];
         Data.ControlPoint = new Vector3(.5f, .5f, .5f);
+        if ((Data.Type == BlockType.Air) | (Data.Type == BlockType.Water))
+            Data.IsSolid = false;
+        else
+            Data.IsSolid = true;
     }
 
-    public BlockClass(BlockType type)
+    public float Strength
     {
-        Data.CPLocked = false;
-        Data.Type = type;
-        Data.Density = Density[(int) Data.Type];
-        Data.Blockiness = Blockiness[(int) Data.Type];
-        Data.Occlude = Occlude[(int) Data.Type];
-        if ((type == BlockType.Air) | (type == BlockType.Water))
-            Data.isSolid = false;
-        else
-            Data.isSolid = true;
+        get { return ((float) _strength[(int) Data.Type]) * 50f; }
     }
 
     public Vector2[] GetTex()
@@ -98,7 +110,7 @@ public class BlockClass
         public byte Occlude;
         public BlockType Type;
         public Vector3 ControlPoint;
-        public bool CPLocked;
-        public bool isSolid;
+        public bool CpLocked;
+        public bool IsSolid;
     }
 }

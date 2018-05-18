@@ -3,12 +3,12 @@
   <Class Name="BlockClass">
     <Position X="12.5" Y="0.5" Width="1.5" />
     <NestedTypes>
-      <Enum Name="BlockClass.Direction" Collapsed="true">
+      <Enum Name="BlockClass.BlockType" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>Assets\BlockClass.cs</NewMemberFileName>
         </TypeIdentifier>
       </Enum>
-      <Enum Name="BlockClass.BlockType" Collapsed="true">
+      <Enum Name="BlockClass.Direction" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>Assets\BlockClass.cs</NewMemberFileName>
         </TypeIdentifier>
@@ -20,7 +20,7 @@
       </Struct>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AAAAABAAAAAEAAAAAAAAAACBAAAAABAAIAIAAAAAAAA=</HashCode>
+      <HashCode>AAAAABAAAAAEAAAgAEAAAACBAABAABAAIAIAAAAAAAA=</HashCode>
       <FileName>Assets\BlockClass.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -41,19 +41,19 @@
   <Class Name="ChunkObject">
     <Position X="16" Y="0.5" Width="3" />
     <NestedTypes>
-      <Delegate Name="ChunkObject.OnChunkBuilt" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Assets\ChunkObject.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Delegate>
       <Enum Name="ChunkObject.RemeshEnum" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>Assets\ChunkObject.cs</NewMemberFileName>
         </TypeIdentifier>
       </Enum>
+      <Delegate Name="ChunkObject.OnChunkBuilt" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\ChunkObject.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>BAAEAgAAMAAACgEkBGACJgQBAAAwAQAAIYhAJAAAAEQ=</HashCode>
+      <HashCode>BAAEAgAAMAAACgEkBGACJgQBAAAwAQAAIYhAIAAAAEQ=</HashCode>
       <FileName>Assets\ChunkObject.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -81,12 +81,12 @@
   <Class Name="LooseBlockScript">
     <Position X="3.75" Y="0.5" Width="1.5" />
     <NestedTypes>
-      <Enum Name="LooseBlockScript.sortDimension" Collapsed="true">
+      <Enum Name="LooseBlockScript.minMax" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>Assets\LooseBlockScript.cs</NewMemberFileName>
         </TypeIdentifier>
       </Enum>
-      <Enum Name="LooseBlockScript.minMax" Collapsed="true">
+      <Enum Name="LooseBlockScript.sortDimension" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>Assets\LooseBlockScript.cs</NewMemberFileName>
         </TypeIdentifier>
@@ -100,26 +100,21 @@
   <Class Name="PhysicsEngine">
     <Position X="5.5" Y="0.5" Width="1.5" />
     <NestedTypes>
-      <Struct Name="PhysicsEngine.SearchResults" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Assets\PhysicsEngine.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Struct>
-      <Struct Name="PhysicsEngine.FillRTNType" Collapsed="true">
+      <Struct Name="PhysicsEngine.FFS_struct" Collapsed="true">
         <TypeIdentifier>
           <NewMemberFileName>Assets\PhysicsEngine.cs</NewMemberFileName>
         </TypeIdentifier>
       </Struct>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>ABAAgBAQABAAAEAAAAAAAAIAAAAgAAAAAAAAMIAAAAA=</HashCode>
+      <HashCode>AQAAgBAQABAAIAAAAAAAAAEAAAIgAAAhQAAAAAAAAAA=</HashCode>
       <FileName>Assets\PhysicsEngine.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="PhysicsObject">
     <Position X="14.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAgAAAAEA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAgAAAAEA=</HashCode>
       <FileName>Assets\PhysicsObject.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -133,7 +128,7 @@
   <Class Name="WorldScript">
     <Position X="10.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAQAAFAQQ6A4gAEAEAABPCCIAAaQCAAAIABBAUCBAEQ=</HashCode>
+      <HashCode>AAQAAFARQ6A4gAEAEAABPCCIAAaQCAAAAABBAUCBAEQ=</HashCode>
       <FileName>Assets\WorldScript.cs</FileName>
     </TypeIdentifier>
   </Class>
