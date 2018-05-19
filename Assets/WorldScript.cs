@@ -51,13 +51,15 @@ public class WorldScript : MonoBehaviour
         _baseChunk = Instantiate(Resources.Load("Prefabs/ChunkPrefab") as GameObject, new Vector3(0, 0, 0), Quaternion.identity);
         _baseBlock = Instantiate(Resources.Load("Prefabs/BlockPrefab") as GameObject, new Vector3(0, 0, 0), Quaternion.identity);
         _physicsPrefab = Instantiate(Resources.Load("Prefabs/PhysicsPrefab") as GameObject, new Vector3(0, 0, 0), Quaternion.identity);
-        _player = Instantiate(Resources.Load("FirstPersonCharacter/Prefabs/FPSController") as GameObject, new Vector3(0, 0, 0), Quaternion.identity);
         gameObject.SetActive(true);
         Debug.Log("Awake");
     }
 
     private void Start()
     {
+        _player = Instantiate(Resources.Load("myFPS") as GameObject, new Vector3(0, 150, 0), Quaternion.identity);
+
+
         try
         { 
             MyPhysics = gameObject.AddComponent<PhysicsEngine>();
@@ -106,7 +108,7 @@ public class WorldScript : MonoBehaviour
 
     private IEnumerator LoadInitScene()
     {
-        _player.GetComponent<FirstPersonController>().Freeze();
+        //_player.GetComponent<RigidBodyFPSController>().Freeze();
 
         foreach (var V in RenderList)
         {
@@ -137,7 +139,7 @@ public class WorldScript : MonoBehaviour
         Debug.Log("Done Loading");
         loadingSlider.gameObject.SetActive(false);
         
-        _player.GetComponent<FirstPersonController>().UnFreeze();
+       // _player.GetComponent<RigidBodyFPSController>().UnFreeze();
         StartCoroutine(UpdateWorld());
         yield return null;
     }
@@ -458,10 +460,10 @@ public class WorldScript : MonoBehaviour
         if (FPC != null)
         {
             var BC = GetBlock(FPC.position);
-            if (BC.Data.Type == BlockClass.BlockType.Water)
+            /*if (BC.Data.Type == BlockClass.BlockType.Water)
                 FPC.gameObject.GetComponent<UnderWater>().Under = true;
             else
-                FPC.gameObject.GetComponent<UnderWater>().Under = false;
+                FPC.gameObject.GetComponent<UnderWater>().Under = false;*/
             Physics.Raycast(FPC.position, FPC.forward, out RH); //Layer mask 0 for chunk
             if (RH.distance < 10)
             {

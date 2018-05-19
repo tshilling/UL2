@@ -57,7 +57,7 @@ public class BlockClass
     public static byte[] Blockiness = {0, 255, 255, 255, 1};
     public static sbyte[] Density = {-126, 127, 127, 127, -127};
     public static byte[] Occlude = {0, 63, 63, 63, 0};
-    private static byte[] _strength = {10, 10, 10, 10, 10};
+    private static byte[] _strength = {15, 15, 15, 15, 15};
     public BlockData Data;
     public int SearchMarker = 0; // Used for Physics Engine
 
