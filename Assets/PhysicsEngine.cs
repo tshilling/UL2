@@ -81,6 +81,7 @@ public class PhysicsEngine : MonoBehaviour
         }
         return output;
     }
+    
     private void ForestFireSearchBuild(Vector3 input)
     {
         _searchCount++;
@@ -126,7 +127,12 @@ public class PhysicsEngine : MonoBehaviour
         _physicsObjects.Clear(); // = new List<GameObject>();
  
         ForestFireSearchBuild(pnt);
-        foreach (var g in _physicsObjects) g.GetComponent<Rigidbody>().WakeUp();
+        foreach (var g in _physicsObjects)
+        {
+
+            g.GetComponent<Rigidbody>().maxDepenetrationVelocity = 0.01f;
+            g.GetComponent<Rigidbody>().WakeUp();
+        }
 
         UnityEngine.Debug.Log("Total Phy: "+_physicsObjects.Count);
     }
