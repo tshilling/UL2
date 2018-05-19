@@ -1,0 +1,177 @@
+[
+    {
+        "Name": "Air",
+        "ImagePath": "HI",
+        "Faces": {
+            "Up": {
+                "RowIndex": 0,
+                "ColumnIndex": 0
+            },
+            "North": {
+                "RowIndex": 0,
+                "ColumnIndex": 0
+            },
+            "East": {
+                "RowIndex": 0,
+                "ColumnIndex": 0
+            },
+            "West": {
+                "RowIndex": 0,
+                "ColumnIndex": 0
+            },
+            "South": {
+                "RowIndex": 0,
+                "ColumnIndex": 0
+            },
+            "Down": {
+                "RowIndex": 0,
+                "ColumnIndex": 0
+            }
+        },
+        "Blockiness": 255,
+        "Density": 255,
+        "Occlusion": 1,
+        "Strength": 0,
+        "IsSolid": false
+    },
+    {
+        "Name": "BedRock",
+        "ImagePath": "{ENGINE_ROOT}/Materials/TerrainMaterial.jpg",
+        "Faces" : {
+            "Top" : {
+                "RowIndex" : 1,
+                "ColumnIndex" : 0
+            },
+            "North" : {
+                "RowIndex": 1,
+                "ColumnIndex": 0
+            },
+            "East" : {
+                "RowIndex" : 1,
+                "ColumnIndex" : 0
+            },
+            "West" : {
+                "RowIndex" : 1,
+                "ColumnIndex" : 0
+            },
+            "South" : {
+                "RowIndex" : 1,
+                "ColumnIndex" : 0
+            },
+            "Down" : {
+                "RowIndex" : 1,
+                "ColumnIndex" : 0
+            }
+        },
+        "Blockiness" : 255,
+        "Density" : 127,
+        "Occlusion" : 63,
+        "Strength" : 10,
+        "IsSolid" : true
+    },
+    {
+        "Name": "Dirt",
+        "ImagePath": "{ENGINE_ROOT}/Materials/TerrainMaterial.jpg",
+        "Faces" : {
+            "Top" : {
+                "RowIndex" : 2,
+                "ColumnIndex" : 0
+            },
+            "North" : {
+                "RowIndex": 2,
+                "ColumnIndex": 0
+            },
+            "East" : {
+                "RowIndex" : 2,
+                "ColumnIndex" : 0
+            },
+            "West" : {
+                "RowIndex" : 2,
+                "ColumnIndex" : 0
+            },
+            "South" : {
+                "RowIndex" : 2,
+                "ColumnIndex" : 0
+            },
+            "Down" : {
+                "RowIndex" : 2,
+                "ColumnIndex" : 0
+            }
+        },
+        "Blockiness" : 255,
+        "Density" : 127,
+        "Occlusion" : 63,
+        "Strength" : 10,
+        "IsSolid" : true
+    },
+    {
+        "Name": "Grass",
+        "ImagePath": "{ENGINE_ROOT}/Materials/TerrainMaterial.jpg",
+        "Faces" : {
+            "Top" : {
+                "RowIndex" : 0,
+                "ColumnIndex" : 0
+            },
+            "North" : {
+                "RowIndex": 3,
+                "ColumnIndex": 0
+            },
+            "East" : {
+                "RowIndex" : 3,
+                "ColumnIndex" : 0
+            },
+            "West" : {
+                "RowIndex" : 3,
+                "ColumnIndex" : 0
+            },
+            "South" : {
+                "RowIndex" : 3,
+                "ColumnIndex" : 0
+            },
+            "Down" : {
+                "RowIndex" : 2,
+                "ColumnIndex" : 0
+            }
+        },
+        "Blockiness" : 255,
+        "Density" : 127,
+        "Occlusion" : 63,
+        "Strength" : 10,
+        "IsSolid" : true
+    },
+    {
+        "Name": "Water",
+        "ImagePath": "{ENGINE_ROOT}/Materials/TerrainMaterial.jpg",
+        "Faces" : {
+            "Top" : {
+                "RowIndex" : 14,
+                "ColumnIndex" : 12
+            },
+            "North" : {
+                "RowIndex" : 14,
+                "ColumnIndex" : 12
+            },
+            "East" : {
+                "RowIndex" : 14,
+                "ColumnIndex" : 12
+            },
+            "West" : {
+                "RowIndex" : 14,
+                "ColumnIndex" : 12
+            },
+            "South" : {
+                "RowIndex" : 14,
+                "ColumnIndex" : 12
+            },
+            "Down" : {
+                "RowIndex" : 14,
+                "ColumnIndex" : 12
+            }
+        },
+        "Blockiness" : 1,
+        "Density" : -127,
+        "Occlusion" : 1,
+        "Strength" : 10,
+        "IsSolid" : false
+    }
+]
