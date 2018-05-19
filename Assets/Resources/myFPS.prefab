@@ -130,6 +130,7 @@ MonoBehaviour:
   minimumY: -60
   maximumY: 60
   WalkSpeed: 3
+  RunSpeed: 6
   JumpHeight: 1.5
 --- !u!143 &143244884463672382
 CharacterController:
