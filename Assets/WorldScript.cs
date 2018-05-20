@@ -11,11 +11,14 @@ using Debug = UnityEngine.Debug;
 
 public class WorldScript : MonoBehaviour
 {
+    public static WorldScript ActiveWorld;
+
+    public BlockClass.BlockType ActiveBlockType = BlockClass.BlockType.Dirt;
     // There was a tendency to get double mouse clicks for some reason.  This static is used to ensure the mosue is released between click events
     private static readonly bool[] MouseState = {false, false, false};
 
     // These are the basic prefabs for building the world.  They must be loaded in the "awake" on this worlf
-    private GameObject _baseBlock;
+    public static GameObject BaseBlock;
     private GameObject _baseChunk;
     private GameObject _physicsPrefab;
     private GameObject _target;
@@ -47,9 +50,10 @@ public class WorldScript : MonoBehaviour
 
     private void Awake()
     {
+        ActiveWorld = this;
         _target = Instantiate(Resources.Load("Prefabs/TargetPrefab") as GameObject,new Vector3(0,0,0),Quaternion.identity);
         _baseChunk = Instantiate(Resources.Load("Prefabs/ChunkPrefab") as GameObject, new Vector3(0, 0, 0), Quaternion.identity);
-        _baseBlock = Instantiate(Resources.Load("Prefabs/BlockPrefab") as GameObject, new Vector3(0, 0, 0), Quaternion.identity);
+        BaseBlock = Instantiate(Resources.Load("Prefabs/BlockPrefab") as GameObject, new Vector3(0, 0, 0), Quaternion.identity);
         _physicsPrefab = Instantiate(Resources.Load("Prefabs/PhysicsPrefab") as GameObject, new Vector3(0, 0, 0), Quaternion.identity);
         gameObject.SetActive(true);
         Debug.Log("Awake");
@@ -119,10 +123,10 @@ public class WorldScript : MonoBehaviour
 
             Chunks.Add(WPt, GO);
            // CO.asyncBuildChunk();
-            CO.preSeed();
+            CO.PreSeed();
             CO.Seed();
             CO.Mesh();
-            CO.postMesh();
+            CO.PostMesh();
 
             yield return null;
         }
@@ -166,7 +170,7 @@ public class WorldScript : MonoBehaviour
             {
                 //  LockAllLooseBlocks(true);
                 CO.Face();
-                CO.postMesh();
+                CO.PostMesh();
                 // LockAllLooseBlocks(false);
             }
 
@@ -175,7 +179,7 @@ public class WorldScript : MonoBehaviour
             {
                 //LockAllLooseBlocks(true);
                 CO.Mesh();
-                CO.postMesh();
+                CO.PostMesh();
                 //LockAllLooseBlocks(false);
             }
 
@@ -205,10 +209,10 @@ public class WorldScript : MonoBehaviour
         var CO = GO.GetComponent<ChunkObject>();
         Chunks.Add(WPt, GO);
 
-        CO.preSeed();
+        CO.PreSeed();
         CO.Seed();
         CO.Mesh();
-        CO.postMesh();
+        CO.PostMesh();
        // CO.asyncBuildChunk();
         //   }
     }
@@ -293,41 +297,42 @@ public class WorldScript : MonoBehaviour
         var CP = new Vector3Int();
         if (Input.GetMouseButton(1)) // Build Block
         {
+            _target.SetActive(true);
             _target.transform.SetPositionAndRotation(Vector3Int.RoundToInt(RH.point + RH.normal * .5f),
                 Quaternion.identity);
             CP = Vector3Int.FloorToInt(_target.transform.position);
-            _target.GetComponent<LooseBlockScript>().InitBlockFromCube(this,CP);
+            _target.GetComponent<LooseBlockScript>().InitBlockFromCube(CP);
             _target.GetComponent<MeshRenderer>().material = TargetMaterial2;
         }
-        else
+        else if(Input.GetMouseButton(0)) // Build Block
         {
+            _target.SetActive(true);
             _target.transform.SetPositionAndRotation(Vector3Int.RoundToInt(RH.point - RH.normal * .5f),
                 Quaternion.identity);
             CP = Vector3Int.FloorToInt(_target.transform.position);
-            _target.GetComponent<LooseBlockScript>().InitBlockFromWorld(this, CP);
+            _target.GetComponent<LooseBlockScript>().InitBlockFromWorld(CP);
             _target.GetComponent<MeshRenderer>().material = TargetMaterial1;
+        }
+        else
+        {
+            _target.SetActive(false);
         }
 
         if (Input.GetMouseButtonUp(0)) // Destroy Block
         {
             if (MouseState[0])
             {
-                _target.transform.SetPositionAndRotation(Vector3Int.RoundToInt(RH.point - RH.normal * .5f),
-                    Quaternion.identity);
-                CP = Vector3Int.FloorToInt(_target.transform.position);
+                _target.transform.SetPositionAndRotation(Vector3Int.RoundToInt(RH.point - RH.normal * .5f),Quaternion.identity);
                 var LastB = GetBlock(_target.transform.position);
-                var NewB = new BlockClass(BlockClass.BlockType.Air,CP);
-                NewB.Data.Blockiness = LastB.Data.Blockiness;
-                NewB.Data.Density = LastB.Data.Density;
-                NewB.Data.ControlPoint = LastB.Data.ControlPoint;
-                var results = SetBlock(_target.transform.position, NewB);
+                LastB.ChangeTypeTo(BlockClass.BlockType.Air);
+                var results = SetBlock(_target.transform.position, LastB);
                 foreach (var GO in results)
                 {
                     GO.GetComponent<ChunkObject>().Face();
-                    GO.GetComponent<ChunkObject>().postMesh();
+                    GO.GetComponent<ChunkObject>().PostMesh();
                 }
                 MyPhysics.PhysicsPrefab = _physicsPrefab;
-                MyPhysics.RebuildModel(CP);
+                MyPhysics.RebuildModel(LastB.Position);
             }
 
             MouseState[0] = false;
@@ -339,12 +344,12 @@ public class WorldScript : MonoBehaviour
             {
                 _target.transform.SetPositionAndRotation(Vector3Int.RoundToInt(RH.point + RH.normal * .5f),
                     Quaternion.identity);
-                var NewB = new BlockClass(BlockClass.BlockType.BedRock, _target.transform.position);
+                var NewB = new BlockClass(ActiveWorld.ActiveBlockType, _target.transform.position);
                 var results = SetBlock(_target.transform.position, NewB);
                 foreach (var GO in results)
                 {
                     GO.GetComponent<ChunkObject>().Mesh();
-                    GO.GetComponent<ChunkObject>().postMesh();
+                    GO.GetComponent<ChunkObject>().PostMesh();
                 }
 
                 MyPhysics.PhysicsPrefab = _physicsPrefab;
@@ -365,10 +370,10 @@ public class WorldScript : MonoBehaviour
         var GO = RH.rigidbody.gameObject;
         if (Input.GetMouseButton(0)) //Destroy Block
         {
+            _target.SetActive(true);
             if (MouseState[0])
             {
-                _target.transform.SetPositionAndRotation(GO.transform.position,
-                    GO.transform.rotation); // Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
+                _target.transform.SetPositionAndRotation(GO.transform.position,GO.transform.rotation);
                 _target.GetComponent<MeshRenderer>().material = TargetMaterial1;
                 _target.GetComponent<MeshFilter>().mesh = GO.GetComponent<MeshFilter>().mesh;
             }
@@ -377,22 +382,15 @@ public class WorldScript : MonoBehaviour
         {
             if (MouseState[1])
             {
-                _target.transform.SetPositionAndRotation(RH.transform.position + RH.normal,
-                    RH.transform.rotation); // Set initial Position
-
-                //Target.transform.SetPositionAndRotation(Vector3Int.RoundToInt(RH.point + RH.normal * .5f),
-                //    Quaternion.identity);
-                CP = Vector3Int.FloorToInt(_target.transform.position);
-                _target.GetComponent<LooseBlockScript>().InitBlockFromCube(this, CP);
+                _target.SetActive(true);
+                _target.transform.SetPositionAndRotation(RH.transform.position + RH.normal,RH.transform.rotation);
+                _target.GetComponent<LooseBlockScript>().InitBlockFromCube(Vector3Int.FloorToInt(_target.transform.position));
                 _target.GetComponent<MeshRenderer>().material = TargetMaterial2;
             }
         }
         else
         {
-            _target.transform.SetPositionAndRotation(GO.transform.position,
-                GO.transform.rotation); // Vector3Int.RoundToInt(RH.point - RH.normal * .5f);
-            _target.GetComponent<MeshRenderer>().material = TargetMaterial1;
-            _target.GetComponent<MeshFilter>().mesh = GO.GetComponent<MeshFilter>().mesh;
+            _target.SetActive(false);
         }
 
         if (Input.GetMouseButtonUp(0)) // Destroy Block
@@ -404,11 +402,8 @@ public class WorldScript : MonoBehaviour
         if (Input.GetMouseButtonUp(1)) // Set Block
         {
             _target.transform.SetPositionAndRotation(RH.transform.position + RH.normal, RH.transform.rotation);    // Set initial Position
-
-            
-            CP = Vector3Int.FloorToInt(_target.transform.position);
-            var temp = Instantiate(_baseBlock, _target.transform.position, RH.transform.rotation);
-            temp.GetComponent<LooseBlockScript>().InitBlockFromCube(this, _target.transform.position);
+            var temp = Instantiate(BaseBlock, _target.transform.position, RH.transform.rotation);
+            temp.GetComponent<LooseBlockScript>().InitBlockFromCube(_target.transform.position);
             temp.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
             Joint J = temp.AddComponent<FixedJoint>();
             J.breakForce = 300;
@@ -452,7 +447,7 @@ public class WorldScript : MonoBehaviour
         foreach (var GO in EffectedChunks)
         {
             GO.GetComponent<ChunkObject>().Mesh();
-            GO.GetComponent<ChunkObject>().postMesh();
+            GO.GetComponent<ChunkObject>().PostMesh();
         }
 
         RaycastHit RH;
@@ -460,24 +455,19 @@ public class WorldScript : MonoBehaviour
         if (FPC != null)
         {
             var BC = GetBlock(FPC.position);
-            /*if (BC.Data.Type == BlockClass.BlockType.Water)
-                FPC.gameObject.GetComponent<UnderWater>().Under = true;
-            else
-                FPC.gameObject.GetComponent<UnderWater>().Under = false;*/
             Physics.Raycast(FPC.position, FPC.forward, out RH); //Layer mask 0 for chunk
             if (RH.distance < 10)
             {
-                _target.SetActive(true);
                 // If it hit a chunk object, something meshed into the world
-                if (RH.rigidbody)
+                if (RH.collider)
                 {
-                    if (RH.rigidbody.gameObject)
+                    if (RH.collider.gameObject)
                     {
-                        if (RH.rigidbody.gameObject.GetComponent<ChunkObject>())
+                        if (RH.collider.name == "Solid")
                         {
                             InteractWithChunk(RH);
                         }
-                        else if (RH.rigidbody.gameObject.GetComponent<LooseBlockScript>())
+                        else if (RH.collider.gameObject.GetComponent<LooseBlockScript>())
                         {
                             InteractWithLoose(RH);
                         }
@@ -537,8 +527,8 @@ public class WorldScript : MonoBehaviour
             (BlockPos.y < BlockProperties.ChunkSize) &
             (BlockPos.z < BlockProperties.ChunkSize))
         {
-            var result = Instantiate(_baseBlock, Pnt, Quaternion.identity);
-            result.GetComponent<LooseBlockScript>().InitBlockFromWorld(this, Pnt);
+            var result = Instantiate(BaseBlock, Pnt, Quaternion.identity);
+            result.GetComponent<LooseBlockScript>().InitBlockFromWorld(Pnt);
             LooseBlocks.Add(result);
             return result;
         }

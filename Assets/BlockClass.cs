@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 
 public class BlockClass
 {
@@ -54,8 +55,8 @@ public class BlockClass
             new Vector2(14, 12)
         } //Air
     };
-    public static byte[] Blockiness = {0, 255, 255, 255, 1};
-    public static sbyte[] Density = {-126, 127, 127, 127, -127};
+    public static byte[] Blockiness = {0, 255, 255, 255, 0};
+    public static sbyte[] Density = {-126, 127, 127, 127, 0};
     public static byte[] Occlude = {0, 63, 63, 63, 0};
     private static byte[] _strength = {15, 15, 15, 15, 15};
     public BlockData Data;
@@ -65,7 +66,6 @@ public class BlockClass
     {
         Position = new Vector3Int(0,0,0);
         Data.Type = BlockType.Air;
-        Data.IsSolid = false;
         InitBlock();
     }
     public BlockClass(BlockType type, Vector3 pos)
@@ -87,12 +87,23 @@ public class BlockClass
         Data.Blockiness = Blockiness[(int)Data.Type];
         Data.Occlude = Occlude[(int)Data.Type];
         Data.ControlPoint = new Vector3(.5f, .5f, .5f);
-        if ((Data.Type == BlockType.Air) | (Data.Type == BlockType.Water))
+        if ((Data.Type == BlockType.Air) || (Data.Type == BlockType.Water))
             Data.IsSolid = false;
         else
             Data.IsSolid = true;
     }
 
+    public void ChangeTypeTo(BlockClass.BlockType NewType)
+    {
+        Data.Type = NewType;
+        Data.Density = Density[(int)Data.Type];
+        Data.Blockiness = Blockiness[(int)Data.Type];
+        Data.Occlude = Occlude[(int)Data.Type];
+        if ((Data.Type == BlockType.Air) || (Data.Type == BlockType.Water))
+            Data.IsSolid = false;
+        else
+            Data.IsSolid = true;
+    }
     public float Strength
     {
         get { return ((float) _strength[(int) Data.Type]) * 50f; }

@@ -778,6 +778,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5802b3792b9b8bc409924419b48feae7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ActiveBlockType: 1
   loadingSlider: {fileID: 8398335}
   LooseBlocks: []
   TargetMaterial1: {fileID: 2100000, guid: fef5c933c90f5884bbec9bee56a5d9dc, type: 2}

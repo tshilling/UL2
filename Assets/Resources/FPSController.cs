@@ -30,6 +30,8 @@ public class FPSController : MonoBehaviour
     // Use this for initialization
     void Start ()
     {
+        //Screen.lockCursor = true;
+        Cursor.lockState = CursorLockMode.Locked;
         CameraObject = gameObject.transform.GetChild(0).gameObject;
         _controller = gameObject.GetComponent<CharacterController>();
         // Make the rigid body not change rotation
@@ -82,6 +84,26 @@ public class FPSController : MonoBehaviour
             velocity.z = MovementVector.z;
         }
 	    _controller.Move(velocity * Time.deltaTime);
+
+        //keyboard inputs
+        switch (Input.inputString)
+        {
+            case "1":
+                WorldScript.ActiveWorld.ActiveBlockType = BlockClass.BlockType.BedRock;
+                break;
+            case "2":
+                WorldScript.ActiveWorld.ActiveBlockType = BlockClass.BlockType.Dirt;
+                break;
+            case "3":
+                WorldScript.ActiveWorld.ActiveBlockType = BlockClass.BlockType.Grass;
+                break;
+            case "4":
+                WorldScript.ActiveWorld.ActiveBlockType = BlockClass.BlockType.Water;
+                break;
+
+        }
+
+
     }
     public static float ClampAngle(float angle, float min, float max)
     {

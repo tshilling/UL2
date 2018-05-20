@@ -26,173 +26,11 @@ public class LooseBlockScript : MonoBehaviour
     public bool Meldable = true;
 
     public bool ReadyForRemesh;
-
     // Update is called once per frame
     private int stableCount;
-
-    private WorldScript World;
-
-    //List<Vector3> CornersSource = new List<Vector3>();
-
-    // Use this for initialization
-    /*
-    public static void InitBlockFromWorld(GameObject G, WorldScript world, Vector3 Pnt)
-    {
-        if(G.GetComponent<Rigidbody>())
-            G.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
-        BlockClass Block;
-        WorldScript World = world;
-        List<Vector3> chunkVertices = new List<Vector3>();
-        List<int> chunkTriangles = new List<int>();
-        List<Vector2> chunkUV = new List<Vector2>();
-        List<Vector3> Corners = new List<Vector3>();
-        List<Vector3> CornersSource = new List<Vector3>();
-
-        Vector3Int ChunkPos = Vector3Int.FloorToInt(Pnt / 16f) * 16;
-        Vector3Int BlockPos = Vector3Int.FloorToInt(Pnt) - ChunkPos;
-        //Test that block is contained in Block
-        if (BlockPos.x >= 0 & BlockPos.y >= 0 & BlockPos.z >= 0 & BlockPos.x < WorldScript.ChunkSize & BlockPos.y < WorldScript.ChunkSize &
-            BlockPos.z < WorldScript.ChunkSize)
-        {
-            GameObject tempChunk;
-            if (world.Chunks.TryGetValue(ChunkPos, out tempChunk))
-            {
-                ChunkObject CO = tempChunk.GetComponent<ChunkObject>();
-                Block = CO.GetBlock(BlockPos);
-                for (int i = 0; i < 8; i++)
-                {
-                    Corners.Add(CO.GetBlock(BlockPos + BlockProperties.FacePts[i]).Data.ControlPoint + BlockProperties.FacePts[i]);
-                    CO.GetBlock(BlockPos + BlockProperties.FacePts[i]).Data.CPLocked = true;
-                    CornersSource.Add(BlockProperties.FacePts[i] + new Vector3(0.5f, 0.5f, 0.5f));
-                }
-                chunkVertices.Clear();
-                chunkTriangles.Clear();
-                chunkUV.Clear();
-                //####################################
-                for (byte Dir = 0; Dir < 6; Dir++)
-                {
-                    byte DirUV = Dir;
-                    byte B0 = (byte)(Block.Data.Occlude & (1 << Dir));
-                    if (B0 > 0)
-                    {
-                        for (int i = 0; i < 4; i++)
-                        {
-                            chunkVertices.Add(BlockProperties.FacePts[BlockProperties.BlockFaces[Dir, i]] + CO.GetBlock(BlockPos + BlockProperties.FacePts[BlockProperties.BlockFaces[Dir, i]]).Data.ControlPoint);
-                        }
-                        Vector3 V1 = chunkVertices[chunkVertices.Count - 1] - chunkVertices[chunkVertices.Count - 2];
-                        Vector3 V2 = chunkVertices[chunkVertices.Count - 3] - chunkVertices[chunkVertices.Count - 2];
-                        Vector3 N = Vector3.Cross(V1, V2).normalized;
-                        if (N.y > .3)
-                        {
-                            DirUV = (byte)BlockClass.Direction.Up;
-                        }
-                        int sc = chunkVertices.Count - 4;
-                        chunkTriangles.Add(sc);
-                        chunkTriangles.Add(sc + 1);
-                        chunkTriangles.Add(sc + 3);
-                        chunkTriangles.Add(sc + 1);
-                        chunkTriangles.Add(sc + 2);
-                        chunkTriangles.Add(sc + 3);
-                        Vector2[] UV = Block.GetTex();
-                        Vector2 uv = new Vector2(UV[DirUV].x / 16f, (15 - UV[DirUV].y) / 16f);
-                        chunkUV.Add(uv);
-                        chunkUV.Add(new Vector2(uv.x + BlockProperties.TUnit, uv.y));
-                        chunkUV.Add(new Vector2(uv.x + BlockProperties.TUnit, uv.y + BlockProperties.TUnit));
-                        chunkUV.Add(new Vector2(uv.x, uv.y + BlockProperties.TUnit));
-                    }
-                }
-                //####################################
-                // Generate Mesh
-                Mesh Rmesh;
-                MeshCollider Rcol;
-                Rmesh = G.GetComponent<MeshFilter>().mesh;
-                Rcol = G.GetComponent<MeshCollider>();
-                Rmesh.Clear();
-                Rmesh.vertices = chunkVertices.ToArray();
-                Rmesh.triangles = chunkTriangles.ToArray();
-                Rmesh.uv = chunkUV.ToArray();
-                Rmesh.RecalculateNormals();
-                if(G.GetComponent<MeshCollider>())
-                    Rcol.sharedMesh = Rmesh;
-            }
-        }
-    }
-    public static void InitBlockAsCube(GameObject G)
-    {
-        BlockClass Block;
-
-        List<Vector3> chunkVertices = new List<Vector3>();
-        List<int> chunkTriangles = new List<int>();
-        List<Vector2> chunkUV = new List<Vector2>();
-        List<Vector3> Corners = new List<Vector3>();
-       // List<Vector3> CornersSource = new List<Vector3>();
-
-        Block = new BlockClass(BlockClass.BlockType.Grass);
-        chunkVertices.Clear();
-        chunkTriangles.Clear();
-        chunkUV.Clear();
-        //####################################
-        Corners.Add(new Vector3(0.5f, 0.5f, 0.5f));
-        Corners.Add(new Vector3(-0.5f, 0.5f, 0.5f));
-        Corners.Add(new Vector3(0.5f, -0.5f, 0.5f));
-        Corners.Add(new Vector3(-0.5f, -0.5f, 0.5f));
-        Corners.Add(new Vector3(0.5f, 0.5f,-0.5f));
-        Corners.Add(new Vector3(-0.5f, 0.5f, -0.5f));
-        Corners.Add(new Vector3(0.5f, -0.5f, -0.5f));
-        Corners.Add(new Vector3(-0.5f, -0.5f, -0.5f));
-        for (byte Dir = 0; Dir < 6; Dir++)
-        {
-            byte DirUV = Dir;
-            for (int i = 0; i < 4; i++)
-            {
-                //Vector3 Pt = BlockProperties.FacePts[i];
-                //Pt *= 0.5f;
-                //Corners.Add(BlockProperties.FacePts[BlockProperties.BlockFaces[Dir, i]] + new Vector3(0.5f, 0.5f, 0.5f));
-                Vector3 Pnt = BlockProperties.FacePts[BlockProperties.BlockFaces[Dir, i]] + new Vector3(0.5f, 0.5f, 0.5f);
-
-                chunkVertices.Add(Pnt);
-            }
-            Vector3 V1 = chunkVertices[chunkVertices.Count - 1] - chunkVertices[chunkVertices.Count - 2];
-            Vector3 V2 = chunkVertices[chunkVertices.Count - 3] - chunkVertices[chunkVertices.Count - 2];
-            Vector3 N = Vector3.Cross(V1, V2).normalized;
-            if (N.y > .3)
-            {
-                DirUV = (byte)BlockClass.Direction.Up;
-            }
-            int sc = chunkVertices.Count - 4;
-            chunkTriangles.Add(sc);
-            chunkTriangles.Add(sc + 1);
-            chunkTriangles.Add(sc + 3);
-            chunkTriangles.Add(sc + 1);
-            chunkTriangles.Add(sc + 2);
-            chunkTriangles.Add(sc + 3);
-            Vector2[] UV = Block.GetTex();
-            Vector2 uv = new Vector2(UV[DirUV].x / 16f, (15 - UV[DirUV].y) / 16f);
-            chunkUV.Add(uv);
-            chunkUV.Add(new Vector2(uv.x + BlockProperties.TUnit, uv.y));
-            chunkUV.Add(new Vector2(uv.x + BlockProperties.TUnit, uv.y + BlockProperties.TUnit));
-            chunkUV.Add(new Vector2(uv.x, uv.y + BlockProperties.TUnit));
-        }
-        //####################################
-        // Generate Mesh
-        Mesh Rmesh;
-        MeshCollider Rcol;
-        Rmesh = G.GetComponent<MeshFilter>().mesh;
-        Rcol = G.GetComponent<MeshCollider>();
-        Rmesh.Clear();
-        Rmesh.vertices = chunkVertices.ToArray();
-        Rmesh.triangles = chunkTriangles.ToArray();
-        Rmesh.uv = chunkUV.ToArray();
-        Rmesh.RecalculateNormals();
-        if (G.GetComponent<MeshCollider>())
-            Rcol.sharedMesh = Rmesh;
-    }
-    */
-    public void InitBlockFromWorld(WorldScript world, Vector3 Pnt)
+    public void InitBlockFromWorld(Vector3 Pnt)
     {
         gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
-        World = world;
-
         var ChunkPos = Vector3Int.FloorToInt(Pnt / 16f) * 16;
         var BlockPos = Vector3Int.FloorToInt(Pnt) - ChunkPos;
         //Test that block is contained in Block
@@ -201,15 +39,13 @@ public class LooseBlockScript : MonoBehaviour
             (BlockPos.z < BlockProperties.ChunkSize))
         {
             GameObject tempChunk;
-            if (world.Chunks.TryGetValue(ChunkPos, out tempChunk))
+            if (WorldScript.ActiveWorld.Chunks.TryGetValue(ChunkPos, out tempChunk))
             {
                 var CO = tempChunk.GetComponent<ChunkObject>();
                 Block = CO.GetBlock(BlockPos);
                 for (var i = 0; i < 8; i++)
                     Corners.Add(CO.GetBlock(BlockPos + BlockProperties.FacePts[i]).Data.ControlPoint +
                                 BlockProperties.FacePts[i]);
-                //CO.GetBlock(BlockPos + BlockProperties.FacePts[i]).Data.CPLocked = true;
-                //CornersSource.Add(BlockProperties.FacePts[i]+new Vector3(0.5f,0.5f,0.5f));
                 chunkVertices.Clear();
                 chunkTriangles.Clear();
                 chunkUV.Clear();
@@ -261,11 +97,10 @@ public class LooseBlockScript : MonoBehaviour
         }
     }
 
-    public void InitBlockFromCube(WorldScript world,Vector3 blockOrigin)
+    public void InitBlockFromCube(Vector3 blockOrigin)
     {
-        World = world;
         var G = gameObject;
-        Block = new BlockClass(BlockClass.BlockType.Grass, blockOrigin);
+        Block = new BlockClass(WorldScript.ActiveWorld.ActiveBlockType, blockOrigin);
         chunkVertices.Clear();
         chunkTriangles.Clear();
         chunkUV.Clear();
@@ -464,131 +299,66 @@ public class LooseBlockScript : MonoBehaviour
     }
     public void MeldBlockIntoWorld()
     {
-        var AffectedChunks = new List<GameObject>();
-        var Pnt = transform.position;
-        Pnt.x = Mathf.Round(Pnt.x);
-        Pnt.y = Mathf.Round(Pnt.y);
-        Pnt.z = Mathf.Round(Pnt.z);
-
-        Vector3 Delta = Pnt - transform.position;
-        
-        // Apply the blocks resulting transformation to each point of the original block
-        var T = transform.rotation;
-        if (Corners.Count == 0)
-            return;
-        for (var i = 0; i < Corners.Count; i++) Corners[i] = T * Corners[i];
-
-        for (int i = 0;i<BlockProperties.FaceBlocksCenter.Length;i++)
-        {
-            int MinIndex = 0;
-            float MinD = 999;
-            if (Corners.Count == 0)
-                break;
-            for (int i2 = 0; i2 < Corners.Count; i2++)
-            {
-                Vector3 P1 = Corners[i2];
-                float Dis = (P1 - (BlockProperties.FaceBlocksCenter[i]*3)).sqrMagnitude;
-                if (Dis < MinD)
-                {
-                    MinD = Dis;
-                    MinIndex = i2;
-                }
-            }
-            Vector3 NewPosition = Corners[MinIndex] - BlockProperties.FacePts[i] - Delta;
-
-            NewPosition.x = Mathf.Clamp01(NewPosition.x);
-            NewPosition.y = Mathf.Clamp01(NewPosition.y);
-            NewPosition.z = Mathf.Clamp01(NewPosition.z);
-            if (i == 0)
-            {
-                var B = Block;
-                B.Position = Vector3Int.RoundToInt(Pnt);
-                if (B.Data.CpLocked)
-                {
-                    B.Data.ControlPoint = (NewPosition + B.Data.ControlPoint) / 2f;
-                }
-                else
-                {
-                    B.Data.ControlPoint = NewPosition;
-                }
-                B.Data.CpLocked = true;
-                AffectedChunks.AddRange(World.SetBlock(B.Position, B));
-            }
-            else
-            {
-                var B = World.GetBlock(Vector3Int.RoundToInt(Pnt) + BlockProperties.FacePts[i]);
-                //There is an occasional Wierd CP due to locks and adjacent blocks melding at the same time.
-                if (B.Data.CpLocked)
-                {
-                    B.Data.ControlPoint = (NewPosition+ B.Data.ControlPoint)/2f;
-                }
-                else
-                {
-                    B.Data.ControlPoint = NewPosition;
-                }
-
-                B.Data.CpLocked = true;
-                List<GameObject> R= World.SetBlock(Vector3Int.RoundToInt(Pnt) + BlockProperties.FacePts[i], B);
-
-                foreach (var GO in R)
-                {
-                    if (GO != null)
-                    {
-                        if (!AffectedChunks.Contains(GO))
-                            AffectedChunks.Add(GO);
-                    }
-                }
-            }
-            Corners.RemoveAt(MinIndex);
-        }
-        foreach (var GO2 in AffectedChunks)
-            GO2.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.Mesh;
-        DestroyBlock();
-        
-    }
-    
-    public void MeldBlockIntoWorld2()
-    {
-        var AffectedChunks = new List<GameObject>();
-        var Pnt = transform.position;
-        Pnt.x = Mathf.Round(Pnt.x);
-        Pnt.y = Mathf.Round(Pnt.y);
-        Pnt.z = Mathf.Round(Pnt.z);
-        // In order to get the chunk that coorisponds to the correct block, PNT must be rounded prior to the next operation
-        var ChunkPos = Vector3Int.FloorToInt(Pnt / 16f) * 16;
-        var BlockPos = Vector3Int.RoundToInt(Pnt) - ChunkPos;
+        var affectedChunks = new List<GameObject>();
+        var pnt = transform.position;
+        var pntI = Vector3Int.RoundToInt(pnt);
 
         // Apply the blocks resulting transformation to each point of the original block
         var T = transform.rotation;
+        var vec = transform.eulerAngles;
+        
+        vec.x = Mathf.RoundToInt(vec.x / 90) * 90;
+        vec.y = Mathf.RoundToInt(vec.y / 90) * 90;
+        vec.z = Mathf.RoundToInt(vec.z / 90) * 90;
+        //transform.eulerAngles = vec;
+        Quaternion euler = Quaternion.Euler(vec);
+        //var T = Quaternion; transform.rotation;
         if (Corners.Count < 8)
             return;
         for (var i = 0; i < Corners.Count; i++) Corners[i] = T * Corners[i];
-        var Results = OrderPoints();
-        var Delta = transform.position - ChunkPos - BlockPos;
-        for (var i = 0; i < BlockProperties.FacePts.Length; i++)
+
+        List<Vector3Int> newPositions = new List<Vector3Int>();
+        int anchor = 0;
+        for (var i = 0; i < BlockProperties.FaceBlocksCenter.Length; i++)
         {
-            var V = BlockProperties.FacePts[i];
-            Vector3 NewPos = ChunkPos + BlockPos + V;
-            var B = World.GetBlock(NewPos);
+            newPositions.Add(Vector3Int.FloorToInt(euler * BlockProperties.FaceBlocksCenter[i]));
+            if (newPositions[i].x >= 0 & newPositions[i].y >= 0 & newPositions[i].z >= 0)
+                anchor = i;
+        }
+
+
+        var Delta = transform.position - pntI;
+        for (var i = 0; i < newPositions.Count; i++)
+        {
+            Vector3Int newPos = newPositions[i] + pntI;
+            BlockClass B = WorldScript.ActiveWorld.GetBlock(newPos);
             if (B == null)
-                B = new BlockClass(BlockClass.BlockType.Grass,this.Block.Position);
-            if (i == 0)
+                B = new BlockClass(BlockClass.BlockType.Grass, this.Block.Position);
+            if (i == anchor)
                 B = Block;
-            B.Data.ControlPoint = Results[V.x + 1, V.y + 1, V.z + 1] - V + Delta;
+            Vector3 newCp = Corners[i] - newPositions[i] + Delta;
+            if (B.Data.CpLocked)
+            {
+                B.Data.ControlPoint = (newCp + B.Data.ControlPoint) / 2f; 
+
+            }
+            else
+            {
+                B.Data.ControlPoint = newCp;
+            }
+
             B.Data.ControlPoint.x = Mathf.Clamp01(B.Data.ControlPoint.x);
             B.Data.ControlPoint.y = Mathf.Clamp01(B.Data.ControlPoint.y);
             B.Data.ControlPoint.z = Mathf.Clamp01(B.Data.ControlPoint.z);
             B.Data.CpLocked = true;
-            AffectedChunks.AddRange(World.SetBlock(NewPos, B));
+            affectedChunks.AddRange(WorldScript.ActiveWorld.SetBlock(newPos, B));
         }
-
-        foreach (var GO2 in AffectedChunks)
-            GO2.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.Mesh;
-        //GO2.GetComponent<ChunkObject>().Mesh();
-        //GO2.GetComponent<ChunkObject>().postMesh();
+        foreach (var go2 in affectedChunks)
+            go2.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.Mesh;
         DestroyBlock();
     }
-    
+
+    // Scans this and all connected blocks, marking all connected blocks as ready for refresh
     private static void MarkForRefresh(GameObject GO)
     {
         GO.GetComponent<LooseBlockScript>().ReadyForRemesh = true;
@@ -606,28 +376,21 @@ public class LooseBlockScript : MonoBehaviour
             {
             }
     }
-
     private void FixedUpdate()
     {
         if (Meldable)
-        {
-            if (GetComponent<Rigidbody>().IsSleeping()) // GetComponent<Rigidbody>().velocity.sqrMagnitude < 0.001) //Mesh not moving
-            {
-                if (!ReadyForRemesh)
+            if (GetComponent<Rigidbody>().IsSleeping()) //Mesh not moving; Velocity check for wobble
+                if (!ReadyForRemesh)    // This section serves to debounce the remelding by delaying it 50 updates
                 {
                     stableCount++;
                     if (stableCount > 50) MarkForRefresh(gameObject);
                 }
-            }
-
-            if (GetComponent<Rigidbody>().velocity.sqrMagnitude > 500) //Mesh moving away fast
+            if (GetComponent<Rigidbody>().velocity.sqrMagnitude > 500) //Mesh moving away fast;  Also deals with items that fall off the world
                 DestroyBlock();
-        }
     }
-
     public void DestroyBlock()
     {
-        World.LooseBlocks.Remove(gameObject);
+        WorldScript.ActiveWorld.LooseBlocks.Remove(gameObject);
         Destroy(gameObject);
     }
 }
