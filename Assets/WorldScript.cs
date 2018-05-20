@@ -328,8 +328,9 @@ public class WorldScript : MonoBehaviour
                 var results = SetBlock(_target.transform.position, LastB);
                 foreach (var GO in results)
                 {
-                    GO.GetComponent<ChunkObject>().Face();
-                    GO.GetComponent<ChunkObject>().PostMesh();
+                    GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.Face;
+                    //GO.GetComponent<ChunkObject>().Face();
+                    //GO.GetComponent<ChunkObject>().PostMesh();
                 }
                 MyPhysics.PhysicsPrefab = _physicsPrefab;
                 MyPhysics.RebuildModel(LastB.Position);
@@ -348,8 +349,9 @@ public class WorldScript : MonoBehaviour
                 var results = SetBlock(_target.transform.position, NewB);
                 foreach (var GO in results)
                 {
-                    GO.GetComponent<ChunkObject>().Mesh();
-                    GO.GetComponent<ChunkObject>().PostMesh();
+                    GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.Mesh;
+                    //GO.GetComponent<ChunkObject>().Mesh();
+                    //GO.GetComponent<ChunkObject>().PostMesh();
                 }
 
                 MyPhysics.PhysicsPrefab = _physicsPrefab;

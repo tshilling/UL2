@@ -298,10 +298,31 @@ public class ChunkObject : MonoBehaviour
         }
     }
 
+    public void Update()
+    {
+        if ((RefreshRequired == ChunkObject.RemeshEnum.FaceUrgent) |
+            (RefreshRequired == ChunkObject.RemeshEnum.Face))
+        {
+            //  LockAllLooseBlocks(true);
+            Face();
+            PostMesh();
+            // LockAllLooseBlocks(false);
+        }
 
+        if ((RefreshRequired == ChunkObject.RemeshEnum.MeshUrgent) |
+            (RefreshRequired == ChunkObject.RemeshEnum.Mesh))
+        {
+            //LockAllLooseBlocks(true);
+            Mesh();
+            PostMesh();
+            //LockAllLooseBlocks(false);
+        }
+
+        RefreshRequired = ChunkObject.RemeshEnum.None;
+    }
     #region Properties
     public BlockClass[][][] Blocks { get; set; }
-    public ChunkObject[,,] Neighbors = new ChunkObject[3, 3, 3];
+    public ChunkObject[,,] Neighbors = new ChunkObject[3, 3, 3];w
     #endregion
 
     #region Events
