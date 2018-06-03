@@ -16,7 +16,7 @@ public class LooseBlockScript : MonoBehaviour
         z = 2
     }
 
-    private BlockClass Block;
+    public BlockClass Block;
     private readonly List<int> chunkTriangles = new List<int>();
     private readonly List<Vector2> chunkUV = new List<Vector2>();
     private readonly List<Vector3> chunkVertices = new List<Vector3>();
@@ -28,8 +28,10 @@ public class LooseBlockScript : MonoBehaviour
     public bool ReadyForRemesh;
     // Update is called once per frame
     private int stableCount;
+    private Vector3 OriginalPosition = new Vector3();
     public void InitBlockFromWorld(Vector3 Pnt)
     {
+        OriginalPosition = Pnt;
         gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
         var ChunkPos = Vector3Int.FloorToInt(Pnt / 16f) * 16;
         var BlockPos = Vector3Int.FloorToInt(Pnt) - ChunkPos;
@@ -96,9 +98,9 @@ public class LooseBlockScript : MonoBehaviour
             }
         }
     }
-
     public void InitBlockFromCube(Vector3 blockOrigin)
     {
+        OriginalPosition = blockOrigin;
         var G = gameObject;
         Block = new BlockClass(WorldScript.ActiveWorld.ActiveBlockType, blockOrigin);
         chunkVertices.Clear();
@@ -299,10 +301,19 @@ public class LooseBlockScript : MonoBehaviour
     }
     public void MeldBlockIntoWorld()
     {
+        
         var affectedChunks = new List<GameObject>();
         var pnt = transform.position;
         var pntI = Vector3Int.RoundToInt(pnt);
+        if(pntI == OriginalPosition)
+        {
 
+            affectedChunks.AddRange(WorldScript.ActiveWorld.SetBlock(pntI, Block));
+            foreach (var go2 in affectedChunks)
+                go2.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.Mesh;
+            DestroyBlock();
+            return;
+        }
         // Apply the blocks resulting transformation to each point of the original block
         var T = transform.rotation;
         var vec = transform.eulerAngles;

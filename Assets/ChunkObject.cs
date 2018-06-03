@@ -106,29 +106,32 @@ public class ChunkObject : MonoBehaviour
 
     public void Seed()
     {
+        WorldScript.Seeder.SeedChunk(_position, Blocks);
+        /*
         //Basic Height Information
+        MyNoise.SetAxisScales(1, 1, 1);
+        MyNoise.SetNoiseType(FastNoiseSIMD.NoiseType.WhiteNoise);
+        MyNoise.SetFrequency(1f);
+        var RandomNumbers = MyNoise.GetSampledNoiseSet(_position.x, 0, _position.z, BlockProperties.ChunkSizeP2, 1, BlockProperties.ChunkSizeP2, 1);
+
         MyNoise.SetAxisScales(1, 1, 1);
         MyNoise.SetNoiseType(FastNoiseSIMD.NoiseType.Cubic);
         MyNoise.SetFrequency(0.01f);
-        var LongPeriod = MyNoise.GetSampledNoiseSet(_position.x, 0, _position.z, BlockProperties.ChunkSizeP2, 1,
-            BlockProperties.ChunkSizeP2, 1);
+        var LongPeriod = MyNoise.GetSampledNoiseSet(_position.x, 0, _position.z, BlockProperties.ChunkSizeP2, 1, BlockProperties.ChunkSizeP2, 1);
         MyNoise.SetNoiseType(FastNoiseSIMD.NoiseType.SimplexFractal);
         MyNoise.SetFractalType(FastNoiseSIMD.FractalType.FBM);
         MyNoise.SetFrequency(0.01f);
-        var ShortPeriod = MyNoise.GetSampledNoiseSet(_position.x, 0, _position.z, BlockProperties.ChunkSizeP2, 1,
-            BlockProperties.ChunkSizeP2, 1);
+        var ShortPeriod = MyNoise.GetSampledNoiseSet(_position.x, 0, _position.z, BlockProperties.ChunkSizeP2, 1, BlockProperties.ChunkSizeP2, 1);
         MyNoise.SetNoiseType(FastNoiseSIMD.NoiseType.SimplexFractal);
         MyNoise.SetFractalType(FastNoiseSIMD.FractalType.Billow);
         MyNoise.SetFrequency(0.01f);
         MyNoise.SetAxisScales(1, 1, 2f);
-        var CavePeriod = MyNoise.GetNoiseSet(_position.x, _position.z, _position.y, BlockProperties.ChunkSizeP2,
-            BlockProperties.ChunkSizeP2, BlockProperties.ChunkSizeP2, 1f);
+        var CavePeriod = MyNoise.GetNoiseSet(_position.x, _position.z, _position.y, BlockProperties.ChunkSizeP2, BlockProperties.ChunkSizeP2, BlockProperties.ChunkSizeP2, 1f);
         MyNoise.SetNoiseType(FastNoiseSIMD.NoiseType.SimplexFractal);
         MyNoise.SetFractalType(FastNoiseSIMD.FractalType.Billow);
         MyNoise.SetFrequency(0.01f);
         MyNoise.SetAxisScales(2, 2, 2);
-        var OutCroppingsPeriod = MyNoise.GetNoiseSet(_position.x, _position.z, _position.y, BlockProperties.ChunkSizeP2,
-            BlockProperties.ChunkSizeP2, BlockProperties.ChunkSizeP2, 1f);
+        var OutCroppingsPeriod = MyNoise.GetNoiseSet(_position.x, _position.z, _position.y, BlockProperties.ChunkSizeP2, BlockProperties.ChunkSizeP2, BlockProperties.ChunkSizeP2, 1f);
 
         var index = 0;
         //Cave Information
@@ -156,11 +159,15 @@ public class ChunkObject : MonoBehaviour
                     var i = LP * 32f + SP * 16f; // Number 0 to 128
                     i = i + BlockProperties.chunkDistance.y * 8 - WPt.y;
                     if (i < 0)
+                    {
                         B = new BlockClass(BlockClass.BlockType.Air, WPt);
-                    else if (i > 1) B = new BlockClass(BlockClass.BlockType.Dirt, WPt);
+                    }
+                    else if (i > 1)
+                    {
+                        B = new BlockClass(BlockClass.BlockType.Dirt, WPt);
+                    }
 
-                    B.Data.Density =
-                        (sbyte) Mathf.Clamp(i * sbyte.MaxValue, sbyte.MinValue, sbyte.MaxValue);
+                    B.Data.Density = (sbyte) Mathf.Clamp(i * sbyte.MaxValue, sbyte.MinValue, sbyte.MaxValue);
                     if (OutCroppingsPeriod[index3++] > .4f) B = new BlockClass(BlockClass.BlockType.BedRock, WPt);
 
                     if (CavePeriod[index2++] > .3f) B = new BlockClass(BlockClass.BlockType.Air, WPt);
@@ -172,16 +179,11 @@ public class ChunkObject : MonoBehaviour
                             sbyte.MaxValue);
                     }
                 }
-
-                /*
-                    if (B.Data.Density <= 0)
-                        B.Data.Density = (sbyte) Mathf.Clamp(B.Data.Density, -126f, -1f);
-                    if (B.Data.Density >= 0)
-                        B.Data.Density = (sbyte)Mathf.Clamp(B.Data.Density, 1f, 127f);*/
                 B.Data.Blockiness = 1;
                 Blocks[X][Y][Z] = B;
             }
         }
+        */
     }
 
     public void PostSeed()
@@ -322,7 +324,7 @@ public class ChunkObject : MonoBehaviour
     }
     #region Properties
     public BlockClass[][][] Blocks { get; set; }
-    public ChunkObject[,,] Neighbors = new ChunkObject[3, 3, 3];w
+    public ChunkObject[,,] Neighbors = new ChunkObject[3, 3, 3];
     #endregion
 
     #region Events

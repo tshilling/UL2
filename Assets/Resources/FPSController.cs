@@ -100,6 +100,12 @@ public class FPSController : MonoBehaviour
             case "4":
                 WorldScript.ActiveWorld.ActiveBlockType = BlockClass.BlockType.Water;
                 break;
+            case "5":
+                WorldScript.ActiveWorld.ActiveBlockType = BlockClass.BlockType.Granite;
+                break;
+            case "6":
+                WorldScript.ActiveWorld.ActiveBlockType = BlockClass.BlockType.Sand;
+                break;
 
         }
 

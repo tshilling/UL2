@@ -12,7 +12,7 @@ using Debug = UnityEngine.Debug;
 public class WorldScript : MonoBehaviour
 {
     public static WorldScript ActiveWorld;
-
+    public static SeederClass Seeder;
     public BlockClass.BlockType ActiveBlockType = BlockClass.BlockType.Dirt;
     // There was a tendency to get double mouse clicks for some reason.  This static is used to ensure the mosue is released between click events
     private static readonly bool[] MouseState = {false, false, false};
@@ -50,6 +50,7 @@ public class WorldScript : MonoBehaviour
 
     private void Awake()
     {
+        Seeder = new SeederClass(123 );
         ActiveWorld = this;
         _target = Instantiate(Resources.Load("Prefabs/TargetPrefab") as GameObject,new Vector3(0,0,0),Quaternion.identity);
         _baseChunk = Instantiate(Resources.Load("Prefabs/ChunkPrefab") as GameObject, new Vector3(0, 0, 0), Quaternion.identity);
@@ -233,7 +234,6 @@ public class WorldScript : MonoBehaviour
                     if (LooseBlocks[i].GetComponent<LooseBlockScript>().ReadyForRemesh)
                     {
                         LooseBlocks[i].GetComponent<LooseBlockScript>().MeldBlockIntoWorld();
-                        //LooseBlocks.RemoveAt(i);
                         i--;
                     }
                 }
@@ -347,6 +347,12 @@ public class WorldScript : MonoBehaviour
                     Quaternion.identity);
                 var NewB = new BlockClass(ActiveWorld.ActiveBlockType, _target.transform.position);
                 var results = SetBlock(_target.transform.position, NewB);
+                foreach (var v in BlockProperties.FacePts)
+                {
+                    var B = GetBlock(_target.transform.position + v);
+                    B.Data.CpLocked = false;
+                    results.AddRange(SetBlock(_target.transform.position + v, B));
+                }
                 foreach (var GO in results)
                 {
                     GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.Mesh;
@@ -432,19 +438,28 @@ public class WorldScript : MonoBehaviour
             NewB.Data.ControlPoint = LastB.Data.ControlPoint;
             var R = SetBlock(Results[i], NewB);
             foreach (var GO in R)
-                if (!EffectedChunks.Contains(GO))
-                    EffectedChunks.Add(GO);
-        }
-
-        for (var i = 0; i < NewBlocks.Count; i++)
-        for (var i2 = i + 1; i2 < NewBlocks.Count; i2++)
-            if ((NewBlocks[i].transform.position - NewBlocks[i2].transform.position).sqrMagnitude < 1.1)
             {
-                var FJ = NewBlocks[i].AddComponent<FixedJoint>();
-                FJ.breakForce = 1000;
-                FJ.breakTorque = 1000;
-                FJ.connectedBody = NewBlocks[i2].GetComponent<Rigidbody>();
+                GO.GetComponent<ChunkObject>().RefreshRequired = ChunkObject.RemeshEnum.Mesh;
+               // if (!EffectedChunks.Contains(GO))
+               //     EffectedChunks.Add(GO);
             }
+        }
+        // Join looseblock to existing mesh
+        for (var i = 0; i < NewBlocks.Count; i++)
+        {
+            var Parent = NewBlocks[i].GetComponent<LooseBlockScript>().Block;
+            for (var i2 = i + 1; i2 < NewBlocks.Count; i2++)
+            {
+                var Neighbor = NewBlocks[i2].GetComponent<LooseBlockScript>().Block;
+                if ((NewBlocks[i].transform.position - NewBlocks[i2].transform.position).sqrMagnitude < 1.1)
+                {
+                    var FJ = NewBlocks[i].AddComponent<FixedJoint>();
+                    FJ.breakForce = Mathf.Min(Parent.Strength, Neighbor.Strength);
+                    FJ.breakTorque = Mathf.Min(Parent.Strength, Neighbor.Strength);
+                    FJ.connectedBody = NewBlocks[i2].GetComponent<Rigidbody>();
+                }
+            }
+        }
 
         foreach (var GO in EffectedChunks)
         {

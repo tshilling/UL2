@@ -12,6 +12,7 @@ namespace Assets
             {
                 if (!blocks[X][Y][Z].Data.CpLocked)
                 {
+                    blocks[X][Y][Z].Data.CpLocked = true;
                     blocks[X][Y][Z].Data.ControlPoint = Vector3.zero;
                     byte edgeCrossings = 0;
                     BlockClass.BlockData[] adjacent =
@@ -80,7 +81,7 @@ namespace Assets
                         {
                             for (byte Dir = 0; Dir < 6; Dir++)
                             {
-                                if (blocks[1+V.x+ BlockProperties.DirectionVector[Dir].x][1+V.y+ BlockProperties.DirectionVector[Dir].y][1+V.z + BlockProperties.DirectionVector[Dir].z].Data.Type == BlockClass.BlockType.Air)
+                                if (blocks[1+V.x+ BlockProperties.DirectionVector[Dir].x][1+V.y+ BlockProperties.DirectionVector[Dir].y][1+V.z + BlockProperties.DirectionVector[Dir].z].Data.Type != BlockClass.BlockType.Water)
                                     AddFaceWater(blocks, waterGeometry, Dir, V);
                             }
                         }
@@ -100,6 +101,9 @@ namespace Assets
 
             return true;
         }
+
+        const float pixelOffset = (1.0f / 256.0f);
+        const float pixelOffset2 = (2.0f / 256.0f);
         private static void AddFace(BlockClass[][][] blocks, GeometryData geo, byte dir, Vector3Int center)
         {
             for (var i = 0; i < 4; i++)
@@ -141,20 +145,41 @@ namespace Assets
 
             var v = blocks[center.x + 1][center.y + 1][center.z + 1].GetTex();
 
-            var uv = new Vector2(v[dir].x / 16f, (15 - v[dir].y) / 16f);
+            var uv = new Vector2(v[dir].x / 16f + pixelOffset, (15 - v[dir].y) / 16f + pixelOffset);
             geo.UV.Add(uv);
-            geo.UV.Add(new Vector2(uv.x + BlockProperties.TUnit, uv.y));
-            geo.UV.Add(new Vector2(uv.x + BlockProperties.TUnit, uv.y + BlockProperties.TUnit));
-            geo.UV.Add(new Vector2(uv.x, uv.y + BlockProperties.TUnit));
+            geo.UV.Add(new Vector2(uv.x + BlockProperties.TUnit - pixelOffset2, uv.y));
+            geo.UV.Add(new Vector2(uv.x + BlockProperties.TUnit - pixelOffset2, uv.y + BlockProperties.TUnit - pixelOffset2));
+            geo.UV.Add(new Vector2(uv.x, uv.y + BlockProperties.TUnit - pixelOffset2));
             //squareCount++;
         }
         private static void AddFaceWater(BlockClass[][][] blocks,GeometryData geo, byte dir, Vector3Int center)
         {
             for (var i = 0; i < 4; i++)
             {
-                var blk = center + BlockProperties.FacePts[BlockProperties.BlockFaces[dir, i]];
-                geo.Vertices.Add(blk + blocks[blk.x+1][blk.y+1][blk.z+1].Data.ControlPoint);
-                geo.Normals.Add(BlockProperties.DirectionVector[dir]);
+                var FacePoint = BlockProperties.FacePts[BlockProperties.BlockFaces[dir, i]];
+                var blk = center + FacePoint;
+                var currentVert = blk + blocks[blk.x + 1][blk.y + 1][blk.z + 1].Data.ControlPoint;
+                geo.Vertices.Add(currentVert);
+                var newNormal = BlockProperties.DirectionVector[dir];
+                /*
+                if (dir == 0)   //UP
+                {
+                    var workingNormal = new Vector3Int(0, 0, 0);
+                    var off = (FacePoint * new Vector3Int(2, 2, 2) + new Vector3Int(1, 1, 1));
+                    if(blocks[center.x+off.x + 1][center.y + 1][center.z + 1].Data.Type != BlockClass.BlockType.Water)
+                    {
+                        workingNormal.x = off.x;
+                    }
+                    if (blocks[center.x  + 1][center.y + 1][center.z + off.z + 1].Data.Type != BlockClass.BlockType.Water)
+                    {
+                        workingNormal.z = off.z;
+                    }
+                    if (workingNormal.sqrMagnitude > 0.001)
+                        newNormal = workingNormal;
+                }*/
+
+                geo.Normals.Add(newNormal);
+
             }
 
             var sc = geo.Vertices.Count - 4; // squareCount << 2;//Multiply by 4
@@ -164,7 +189,7 @@ namespace Assets
             geo.Triangles.Add(sc + 1);
             geo.Triangles.Add(sc + 2);
             geo.Triangles.Add(sc + 3);
-            var v = blocks[center.x + 1][center.y + 1][center.z + 1].GetTex();
+            //var v = blocks[center.x + 1][center.y + 1][center.z + 1].GetTex();
 
             var uv = new Vector2(0, 0);
             geo.UV.Add(uv);
@@ -179,8 +204,14 @@ namespace Assets
             meshData.vertices = geometry.Vertices.ToArray();
             meshData.triangles = geometry.Triangles.ToArray();
             meshData.uv = geometry.UV.ToArray();
-            if(calcNormals)
+            if (calcNormals)
+            {
                 meshData.RecalculateNormals();
+            }
+            else
+            {
+                meshData.normals = geometry.Normals.ToArray();
+            }
             if (gameObject.GetComponent<MeshCollider>())
             {
                 MeshCollider meshCollider = gameObject.GetComponent<MeshCollider>();

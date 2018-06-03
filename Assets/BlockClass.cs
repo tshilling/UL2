@@ -12,9 +12,10 @@ public class BlockClass
         BedRock = 1,
         Dirt = 2,
         Grass = 3,
-        Water = 4
+        Water = 4,
+        Granite = 5,
+        Sand = 6
     }
-
     public enum Direction
     {
         Up = 0,
@@ -24,7 +25,6 @@ public class BlockClass
         South = 4,
         Down = 5
     }
-
     public Vector3Int Position = new Vector3Int();
     // Provides BlockType information for each face of a six-sided cube, but what do the Y component of Vector2 represent?
     public static Vector2[][] Texture =
@@ -53,12 +53,22 @@ public class BlockClass
         {
             new Vector2(14, 12), new Vector2(14, 12), new Vector2(14, 12), new Vector2(14, 12), new Vector2(14, 12),
             new Vector2(14, 12)
-        } //Air
+        }, //water
+        new[]
+        {
+            new Vector2(3,1), new Vector2(3,1), new Vector2(3,1), new Vector2(3,1), new Vector2(3,1),
+            new Vector2(3,1)
+        }, //Granite
+        new[]
+        {
+            new Vector2(2,1), new Vector2(2,1), new Vector2(2,1), new Vector2(2,1), new Vector2(2,1),
+            new Vector2(2,1)
+        }, //Sand
     };
-    public static byte[] Blockiness = {0, 255, 255, 255, 0};
-    public static sbyte[] Density = {-126, 127, 127, 127, 0};
-    public static byte[] Occlude = {0, 63, 63, 63, 0};
-    private static byte[] _strength = {15, 15, 15, 15, 15};
+    public static byte[] Blockiness = {0, 255, 50, 100, 0,255,0};
+    public static sbyte[] Density = {-126, 127, 127, 127, 0,127,127};
+    public static byte[] Occlude = {0, 63, 63, 63, 0,63,63};
+    private static byte[] _strength = {0, 50, 20, 20, 50,20,4};
     public BlockData Data;
     public int SearchMarker = 0; // Used for Physics Engine
 
@@ -92,7 +102,6 @@ public class BlockClass
         else
             Data.IsSolid = true;
     }
-
     public void ChangeTypeTo(BlockClass.BlockType NewType)
     {
         Data.Type = NewType;
@@ -106,14 +115,12 @@ public class BlockClass
     }
     public float Strength
     {
-        get { return ((float) _strength[(int) Data.Type]) * 50f; }
+        get { return ((float) _strength[(int) Data.Type]) * 10f; }
     }
-
     public Vector2[] GetTex()
     {
         return Texture[(byte) Data.Type];
     }
-
     public struct BlockData
     {
         public sbyte Density;
@@ -124,4 +131,5 @@ public class BlockClass
         public bool CpLocked;
         public bool IsSolid;
     }
+    public InterfaceClass[] Interfaces = new InterfaceClass[6];//One interface class per side
 }
